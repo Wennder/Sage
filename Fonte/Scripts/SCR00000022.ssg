@@ -1,0 +1,4 @@
+--Autor: André Luis
+--Data de criação: 06/03/2007 - 23:18
+alter table tbpedido
+alter icliente drop not  null

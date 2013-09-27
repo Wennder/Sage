@@ -1,0 +1,22 @@
+--Autor: André Luis
+--Data de criação: 02/03/2007 - 20:50
+--DROP TABLE TbServicoTecnico CASCADE;
+CREATE TABLE TbServicoTecnico(
+	iCodigo		INTEGER		NOT NULL,
+	iPedido		INTEGER 	NOT NULL,
+	iServico	INTEGER		NOT NULL,
+	iTecnico	INTEGER		NOT NULL,
+	nComissao	NUMERIC(6,4)	NOT NULL,
+	nValorServico	NUMERIC(12,2)	NOT NULL,
+	nValorComissao	NUMERIC(12,2)	NOT NULL,
+	PRIMARY KEY(iCodigo),
+	CONSTRAINT FKTbServicoTecnicoTbPedido FOREIGN KEY (iPedido)
+		REFERENCES TbPedido(iCodigo) MATCH SIMPLE
+		ON UPDATE NO ACTION ON DELETE NO ACTION,
+	CONSTRAINT FKTbServicoTecnicoTbProduto FOREIGN KEY (iServico)
+		REFERENCES TbProduto(iCodigo) MATCH SIMPLE
+		ON UPDATE NO ACTION ON DELETE NO ACTION,
+	CONSTRAINT FKTbServicoTecnicoTbTecnico FOREIGN KEY (iTecnico)
+		REFERENCES TbComissionado(iCodigo) MATCH SIMPLE
+		ON UPDATE NO ACTION ON DELETE NO ACTION
+);

@@ -1,0 +1,13 @@
+create table tbrecconta(
+	iconta integer,
+	icontaorigem integer,
+	parcela integer,
+	dvencimento date,
+	nvalor numeric,
+	ddatabaixa date,
+	nvaloramortizado numeric,
+	primary key(iconta),
+	CONSTRAINT fktbreccontatbreccontaorigem FOREIGN KEY (icontaorigem)
+	REFERENCES tbreccontaorigem (icontaorigem) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION
+)

@@ -1,0 +1,53 @@
+﻿CREATE TABLE IF NOT EXISTS tbinventario
+(
+  icodigo serial NOT NULL, -- CODIGO IDENTIFICADOR DA TABELA
+  ddataoperacao timestamp without time zone, -- DATA DE DIGITACAO
+  sstatus character(1) NOT NULL DEFAULT 'A',
+  idusuariocad integer NOT NULL DEFAULT 0, -- indica o usuário que registrou a entrada.
+  idusuarioultalt integer, -- indica o código do usuário que alterou/cancelou da entrada.
+  datahoraultalt timestamp without time zone, -- data e hora da alteração/cancelamento da entrada.
+  CONSTRAINT tbinventario_pkey PRIMARY KEY (icodigo),
+  CONSTRAINT tbinventario_usuarioalt FOREIGN KEY (idusuarioultalt)
+      REFERENCES tbusuario (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT tbinventario_usuariocad FOREIGN KEY (idusuariocad)
+      REFERENCES tbusuario (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE tbinventario
+  OWNER TO postgres;
+COMMENT ON COLUMN tbinventario.icodigo IS 'código identificador da tabela';
+COMMENT ON COLUMN tbinventario.ddataoperacao IS 'data da digitação';
+COMMENT ON COLUMN tbinventario.sstatus IS 'Status do inventário (A = Ativo / F = Fechado / I = Inativo)';
+COMMENT ON COLUMN tbinventario.idusuariocad IS 'indica o usuário que registrou a entrada.';
+COMMENT ON COLUMN tbinventario.idusuarioultalt IS 'indica o código do usuário que alterou/cancelou da entrada.';
+COMMENT ON COLUMN tbinventario.datahoraultalt IS 'data e hora da alteração/cancelamento da entrada.';
+
+CREATE TABLE IF NOT EXISTS tbinventarioitens
+(
+  icodigo serial NOT NULL, -- CÓDIGO IDENTIFICADOR DA TABELA
+  iinventario int NOT NULL, -- CÓDIGO DO INVENTÁRIO (FK)
+  iproduto int NOT NULL, -- CÓDIGO DO PRODUTO (FK)
+  nqtdcontada numeric(12,2) NOT NULL DEFAULT 0, -- DIFERENÇA APURADA ENTRE A CONTAGEM E SALDO;
+  ndiferenca numeric(12,2) NOT NULL DEFAULT 0, -- DIFERENÇA APURADA ENTRE A CONTAGEM E SALDO;
+  CONSTRAINT tbinventarioietns_pkey PRIMARY KEY (icodigo),
+  CONSTRAINT tbinventarioitens_tbinventario FOREIGN KEY (iinventario)
+      REFERENCES tbinventario (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT tbinventarioitens_tbproduto FOREIGN KEY (iproduto)
+      REFERENCES tbproduto (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE tbinventarioitens
+  OWNER TO postgres;
+COMMENT ON COLUMN tbinventarioitens.icodigo IS 'código identificador da tabela';
+COMMENT ON COLUMN tbinventarioitens.iinventario IS 'código do inventario (FK)';
+COMMENT ON COLUMN tbinventarioitens.iproduto IS 'código do produto (FK)';
+COMMENT ON COLUMN tbinventarioitens.nqtdcontada IS 'quantidade contada.';
+COMMENT ON COLUMN tbinventarioitens.ndiferenca IS 'diferença no momento da apuração (contada - último saldo em estoque).';

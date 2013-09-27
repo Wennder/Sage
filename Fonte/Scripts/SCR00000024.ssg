@@ -1,0 +1,13 @@
+CREATE TABLE TBCONSUMIDOR(
+	iPedido integer not null,
+	sNome varchar(50),
+	sEndereco varchar(50),
+	sBairro varchar(30),
+	iCidade integer,
+	scep varchar(8),
+	sFone varchar(10),
+	primary key (ipedido),
+	CONSTRAINT tbconsumidor_icidade FOREIGN KEY (icidade)
+      REFERENCES tbcidade (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)

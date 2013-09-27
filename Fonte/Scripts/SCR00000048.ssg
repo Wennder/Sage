@@ -1,0 +1,2 @@
+insert into tbpesquisa(icodigo, iteclas, sdescricao, scomando, scampo, sparametrocomplementar, scamporetorno)
+values(19,0, 'Pesquisa de fornecedores', 'SELECT TBPESSOA.ICODIGO AS CODIGO, TBPESSOA.SNOME AS NOME FROM TBFORNECEDOR JOIN TBPESSOA ON TBPESSOA.ICODIGO = TBFORNECEDOR.IPESSOA','SNOME','WHERE 1=1','CODIGO')

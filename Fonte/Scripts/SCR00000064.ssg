@@ -1,0 +1,22 @@
+CREATE OR REPLACE FUNCTION script_64() RETURNS void AS
+$$
+BEGIN
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbpesquisa
+			WHERE  sdescricao = 'Pesquisa de Scripts Executados'
+			)
+	THEN
+		insert into tbpesquisa (iteclas, sdescricao, scomando,scampo,sparametrocomplementar,scamporetorno,frmcadastro)
+		values
+		(0,'Pesquisa de Scripts Executados', 
+		   'select cast(s.nmscript as varchar(15)) as Script, s.dataexecucao as Executado, u.snome as Usuario	
+			from tbscript s
+			inner join tbusuario u on u.icodigo = s.idusuario',
+		's.idscript', Null, 'Script', Null);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_64();
+DROP FUNCTION script_64();
+

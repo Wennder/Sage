@@ -1,0 +1,122 @@
+﻿CREATE OR REPLACE FUNCTION script_66() RETURNS void AS
+$$
+BEGIN
+	CREATE TABLE IF NOT EXISTS temp_tbentradaitens
+	(
+	  icodigo integer NOT NULL,
+	  iproduto integer NOT NULL,
+	  nquantidade numeric(12,2),
+	  valor numeric(12,2),
+	  ientrada int
+	);
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentradaitens'
+			  AND  column_name = 'ientrada'
+			)
+	THEN
+		ALTER TABLE tbentradaitens ADD COLUMN ientrada INT;
+		comment ON COLUMN tbentradaitens.ientrada IS 'código da entrada (FK)';	
+	END IF;
+
+	UPDATE tbentradaitens set ientrada = icodigo
+	WHERE ientrada is null;
+	
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentradaitens'
+			  AND  column_name = 'ientrada'
+			)
+	THEN
+		ALTER TABLE tbentradaitens ALTER COLUMN ientrada SET NOT NULL;
+		comment ON COLUMN tbentradaitens.ientrada IS 'código da entrada (FK)';	
+	END IF;
+
+	insert into temp_tbentradaitens
+	select * from tbentradaitens a
+	where not exists (select null from temp_tbentradaitens b where b.ientrada = a.ientrada and b.iproduto = a.iproduto);
+
+	delete from tbentradaitens;
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_entrada'
+			)
+	THEN
+		ALTER TABLE tbentradaitens
+		DROP CONSTRAINT tbentradaitens_entrada;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_tbentrada'
+			)
+	THEN
+		ALTER TABLE tbentradaitens
+		ADD CONSTRAINT tbentradaitens_tbentrada FOREIGN KEY(ientrada)
+			REFERENCES tbentrada(icodigo) MATCH SIMPLE ON
+			UPDATE NO ACTION ON 
+			DELETE NO ACTION;		
+	END IF;
+	
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_pkey'
+			)
+	THEN
+		ALTER TABLE tbentradaitens
+			DROP CONSTRAINT tbentradaitens_pkey;
+	END IF;			
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_pkey'
+			)
+	THEN
+		ALTER TABLE tbentradaitens
+			ADD CONSTRAINT tbentradaitens_pkey PRIMARY KEY(icodigo);
+	END IF;			
+	
+	UPDATE tbproduto set 
+		sdescricao = replace(replace(trim(sdescricao),'   ',' '),'  ',' '), 
+		sreferencia = upper(sreferencia), 
+		sfabricacao = upper(sfabricacao);
+
+	UPDATE tbgrupo set 
+		sdescricao = replace(replace(trim(sdescricao),'   ',' '),'  ',' ');
+
+	UPDATE tbsubgrupo set 
+	sdescricao = replace(replace(trim(sdescricao),'   ',' '),'  ',' ');
+
+	UPDATE tbmarca set 
+	sdescricao = replace(replace(trim(sdescricao),'   ',' '),'  ',' ');
+
+	UPDATE tbpessoa set 
+	snome = replace(replace(trim(snome),'   ',' '),'  ',' ');	
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_66();
+DROP FUNCTION script_66();
+
+DROP SEQUENCE IF EXISTS tbentradaitens_icodigo_seq CASCADE;
+CREATE SEQUENCE tbentradaitens_icodigo_seq;
+SELECT setval('tbentradaitens_icodigo_seq', (SELECT COALESCE(MAX(icodigo),1) FROM tbentradaitens));
+ALTER TABLE tbentradaitens ALTER COLUMN icodigo SET DEFAULT nextval('tbentradaitens_icodigo_seq');
+
+insert into tbentradaitens (iproduto, nquantidade, valor, ientrada)
+select iproduto, nquantidade, valor, ientrada from temp_tbentradaitens tmp
+where not exists (select null from tbentradaitens e where e.ientrada = tmp.ientrada and e.iproduto = tmp.iproduto)
+and tmp.ientrada <= (select max(icodigo) from tbentrada);
+
+drop table temp_tbentradaitens;

@@ -1,0 +1,44 @@
+/************************************************************
+ * Autor........: Jeimyson Souza
+ * Modulo.......: Todos
+ * Data/Hora....: 02/07/2013 20:40
+ * Obj. Ult Alt.: Script Oficial 72
+ ************************************************************/
+
+CREATE OR REPLACE FUNCTION script_72() RETURNS void
+AS $$
+BEGIN
+	UPDATE TBPESQUISA
+	SET    SCOMANDO  = 
+	       'SELECT tbpedido.ddatapedido AS DATA ,tbpedido.icodigo AS Pedido ,nf.iNotafiscal AS NF ,cast(CASE WHEN bpedido = ''t'' AND inotafiscal IS NULL AND COALESCE(bcupomfiscal, false) = ''f'' THEN ''Pedido'' WHEN bpedido = ''f'' AND inotafiscal IS NULL AND COALESCE(bcupomfiscal, false) = ''f'' THEN ''Orçamento'' WHEN bpedido = ''t'' AND inotafiscal IS NOT NULL AND COALESCE(bcupomfiscal, false) = ''f'' THEN ''NF'' WHEN bpedido = ''f'' AND inotafiscal IS NULL AND COALESCE(bcupomfiscal, false) = ''t'' THEN ''CF'' ELSE NULL END as varchar(10)) AS Tipo,COALESCE(c.sNome, pc.snome, ''CONSUMIDOR'') AS Cliente FROM   tbpedido LEFT JOIN tbpessoa c ON c.icodigo = tbpedido.icliente LEFT JOIN tbconsumidor pc ON pc.ipedido = tbpedido.icodigo LEFT JOIN tbnotafiscal nf on nf.icodigo = tbpedido.icodnotafiscal'
+	WHERE  ICODIGO   = 13;
+	
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbinventario'
+			  AND  column_name = 'iempresa'
+			)
+	THEN
+		ALTER TABLE tbinventario ADD COLUMN iempresa INT NOT NULL DEFAULT 1;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT *
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbinventario'
+			  AND  constraint_name = 'fktbinventario_empresa'
+			)
+	THEN
+		ALTER TABLE tbinventario
+		  ADD CONSTRAINT fktbinventario_empresa FOREIGN KEY(iempresa)
+		      REFERENCES tbempresa(iempresa) MATCH SIMPLE
+		      ON 
+		UPDATE NO ACTION ON 
+		DELETE NO ACTION;
+	END IF;
+	
+END;	
+$$ LANGUAGE plpgsql;
+SELECT script_72();
+DROP FUNCTION script_72();

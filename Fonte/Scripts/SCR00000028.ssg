@@ -1,0 +1,18 @@
+create table tbusuario(
+	icodigo integer,
+	snome varchar(50),
+	slogin varchar(50),
+	ssenha varchar(50),
+	sstatus varchar(1) default 'A',
+	primary key(icodigo)
+);
+
+comment on table tbusuario is 'tabela de usuários';
+comment on column tbusuario.icodigo is 'código do usuário';
+comment on column tbusuario.snome is 'nome do usuario';
+comment on column tbusuario.slogin is 'login de acesso ao sistema';
+comment on column tbusuario.ssenha is 'senha de acesso ao sistema';
+comment on column tbusuario.sstatus is 'A = ativo; I= inativo';
+
+insert into tbpesquisa(icodigo, iteclas, sdescricao, scomando, scampo, sparametrocomplementar, scamporetorno)
+values(15, 0, 'Pesquisa de Usuários', 'SELECT ICODIGO AS CODIGO, SNOME AS NOME FROM TBUSUARIO', 'SNOME', 'WHERE SSTATUS = ''A''', 'CODIGO');

@@ -1,0 +1,108 @@
+﻿create or replace function script_56() returns void as
+$$
+begin
+	if not exists(SELECT null FROM information_schema.columns WHERE table_name ='tbpedido' and column_name = 'iflagsituacao')
+	then 
+		alter table tbpedido
+		add iflagsituacao int null;
+		comment on column tbpedido.iflagsituacao is 'indica a situacao do pedido de acordo com a tabela tbpedidosituacao';
+	end if;
+
+	if not exists (select null from information_schema.tables where table_name = 'tbpedidosituacao')
+	then
+		create table tbpedidosituacao(
+			icodigo int not null,
+			sdescricao varchar(30) not null,
+			primary key (icodigo)
+		);
+		
+		comment on table tbpedidosituacao is 'armazena as possiveis situacoes dos pedidos';
+
+		insert into tbpedidosituacao(icodigo, sdescricao) values (1, 'Orçamento Aberto');
+		insert into tbpedidosituacao(icodigo, sdescricao) values (2, 'Orçamento Fechado');
+		insert into tbpedidosituacao(icodigo, sdescricao) values (3, 'Nota Fiscal');
+		insert into tbpedidosituacao(icodigo, sdescricao) values (4, 'Cupom Fiscal');
+		
+		update tbpedido set iflagsituacao = 3 where inotafiscal is not null	and chave is not null;
+		update tbpedido set iflagsituacao = 2 where inotafiscal is null	and chave is null;
+		
+	end if;			
+	
+	if not exists(select null from information_schema.tables where table_name = 'vw_saidas_produto')
+	then
+	CREATE OR REPLACE VIEW vw_saidas_produto AS 
+ SELECT tbpedido.ddatapedido, tbpedido.thorapedido, tbpedidoitens.iproduto, 
+    tbpedidoitens.nquantidade * (-1)::numeric AS nquantidade, 
+    tbpedido.icodigo AS ipedido, 
+    COALESCE(tbpedido.inotafiscal, 0) AS inotafiscal
+   FROM tbpedido
+   JOIN tbpedidoitens ON tbpedidoitens.ipedido = tbpedido.icodigo
+  WHERE tbpedido.sstatus = 'A'::bpchar AND (tbpedido.iflagsituacao = ANY (ARRAY[2, 3, 4]))
+  ORDER BY tbpedido.ddatapedido;
+
+	end if;
+end;
+$$ language plpgsql;
+select script_56();
+drop function script_56();
+
+
+create or replace function retorna_estoque_atual_produto(piproduto int) returns numeric as
+$$
+declare
+	total_saidas numeric := 0;
+	total_entradas numeric := 0;
+	total_inventarios numeric := 0;
+begin
+	--calcular total de saida de vendas
+	select coalesce((select sum(nquantidade) 	
+	from vw_saidas_produto
+	where iproduto = piproduto),(select 0)) into total_saidas;
+
+	total_saidas = total_saidas * -1;
+	
+	--calcular total de entrada
+	
+	--claular o total de inventarios
+	
+	--Calcula estoque atual total
+	return (total_saidas + total_entradas + total_inventarios);
+		
+end;
+$$ language plpgsql;
+
+
+
+create or replace function gera_historico_movimentacao(piproduto int, pdata_inicio date, pdata_fim date) returns void as
+$$
+begin
+	if exists(select null from information_schema.tables where table_name = 'tb_temp_historico_movimentacao') 
+	then
+		drop table tb_temp_historico_movimentacao;
+	end if;
+	
+	create temporary table tb_temp_historico_movimentacao(
+		iproduto int,
+		data_mov date,
+		hora_mov time,
+		detalhes varchar(300),
+		qtd_mov numeric
+	);
+
+	--insere movimentação de venda
+	insert into tb_temp_historico_movimentacao(iproduto, data_mov, hora_mov, detalhes, qtd_mov)
+	select iproduto, ddatapedido, thorapedido, cast('codigo: ' || cast(ipedido as varchar(30)) || ' nota fiscal: ' || cast(inotafiscal as varchar(30)) as text)
+	,nquantidade  
+	from vw_saidas_produto where iproduto = piproduto and ddatapedido between pdata_inicio and pdata_fim;
+	
+	--insere movimentação de entrada
+	
+	
+	--insere movimentação de inventario
+	
+	--Exemplo de chamada do comando
+	--select gera_historico_movimentacao(12,'2000-01-01', '2014-01-01');
+	--select * from tb_temp_historico_movimentacao order by data_mov, hora_mov
+end;
+$$ language plpgsql;
+

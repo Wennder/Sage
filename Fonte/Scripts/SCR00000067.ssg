@@ -1,0 +1,78 @@
+﻿CREATE OR REPLACE FUNCTION script_67() RETURNS void AS
+$$
+BEGIN
+	DROP VIEW IF EXISTS vwInventario;
+	CREATE OR REPLACE VIEW vwInventario
+	AS
+	SELECT i.icodigo
+		  ,i.ddataoperacao
+		  ,i.sstatus
+		  ,CAST(
+			   CASE 
+					WHEN i.sstatus = 'A' THEN 'Aberto'
+					WHEN i.sstatus = 'F' THEN 'Fechado'
+					WHEN i.sstatus = 'I' THEN 'Inativo'					
+			   END AS VARCHAR(10)
+		   ) AS nmstatus
+		  ,i.idusuariocad
+		  ,uc.snome AS nmusuariocad
+		  ,i.idusuarioultalt
+		  ,uc.snome AS nmusuarioalt
+		  ,i.datahoraultalt
+		  ,CAST(
+			   CASE 
+					WHEN i.sstatus = 'F' THEN i.datahoraultalt
+					ELSE NULL
+			   END AS timestamp
+		   ) AS ddatafechamento, i.iempresa
+
+	FROM   tbinventario i
+	INNER JOIN tbusuario uc ON uc.icodigo = i.idusuariocad
+	LEFT JOIN tbusuario ua ON ua.icodigo = i.idusuarioultalt;
+	
+	DROP VIEW IF EXISTS vwInventarioItens;
+	CREATE OR REPLACE VIEW vwInventarioItens
+	AS
+	SELECT ii.icodigo
+		  ,ii.iinventario
+		  ,i.ddataoperacao
+		  ,i.sstatus
+		  ,CAST(
+			   CASE 
+					WHEN i.sstatus = 'A' THEN 'Aberto'
+					WHEN i.sstatus = 'F' THEN 'Fechado'
+					WHEN i.sstatus = 'I' THEN 'Inativo'					
+			   END AS VARCHAR(10)
+		   ) AS nmstatus
+		  ,i.idusuariocad
+		  ,i.idusuarioultalt
+		  ,i.datahoraultalt
+		  ,CAST(
+			   CASE 
+					WHEN i.sstatus = 'F' THEN i.datahoraultalt
+					ELSE NULL
+			   END AS timestamp
+		   ) AS ddatafechamento
+		  ,ii.iproduto
+		  ,p.sreferencia
+		  ,p.sfabricacao
+		  ,p.sdescricao AS nmproduto
+		  ,p.sdescricao || ' - ' || m.sdescricao || ' ' ||  p.sreferencia AS nmprodutocommarca
+		  ,p.isubgrupo
+		  ,s.sdescricao AS nmsubgrupo
+		  ,p.igrupo
+		  ,g.sdescricao AS nmgrupo
+		  ,p.imarca
+		  ,m.sdescricao AS nmmarca
+		  ,ii.nqtdcontada
+		  ,ii.ndiferenca
+	FROM   tbinventarioitens ii
+	INNER JOIN tbinventario i ON i.icodigo = ii.iinventario
+	INNER JOIN tbproduto p ON p.icodigo = ii.iproduto
+	INNER JOIN tbsubgrupo s ON s.icodigo = p.isubgrupo AND s.igrupo = p.igrupo
+	INNER JOIN tbgrupo g ON g.icodigo = p.igrupo
+	INNER JOIN tbmarca m ON m.icodigo = p.imarca;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_67();
+DROP FUNCTION script_67();

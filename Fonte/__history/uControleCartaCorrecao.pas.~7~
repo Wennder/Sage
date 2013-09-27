@@ -1,0 +1,43 @@
+unit uControleCartaCorrecao;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, uCadastroGenerico, cxGraphics,
+  cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore,
+  dxSkinOffice2010Silver, Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, JvExControls,
+  JvNavigationPane, cxControls, cxContainer, cxEdit, cxLabel;
+
+type
+  TfrmControleCartaCorrecao = class(TfrmCadastroGenerico)
+    OpenDialog1: TOpenDialog;
+    cxLabel1: TcxLabel;
+    procedure btnGravaClick(Sender: TObject);
+    procedure BtnSairClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmControleCartaCorrecao: TfrmControleCartaCorrecao;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmControleCartaCorrecao.btnGravaClick(Sender: TObject);
+begin
+  inherited;
+  Opendialog1.Title := 'NF-e para geração de carta de correção (Com recibo da SEFAZ)';
+  if OpenDialog1.Execute then
+  begin
+    ShowMessage(OpenDialog1.FileName);
+  end;
+
+end;
+
+
+end.

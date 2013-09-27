@@ -1,0 +1,22 @@
+create table tbgrupousuario(
+	icodigo integer not null,
+	snome varchar(50) not null,
+	sstatus varchar(1) not null default 'A',
+	primary key (icodigo)
+);
+comment on table tbgrupousuario is'Tabela de grupo de usuários';
+comment on column tbgrupousuario.icodigo is 'Código do usuário';
+comment on column tbgrupousuario.snome is 'Nome do grupo de usuários';
+comment on column tbgrupousuario.sstatus is 'A = Ativo; I = Inativo';
+
+insert into tbpesquisa(icodigo, iteclas, sdescricao, scomando, scampo, sparametrocomplementar, scamporetorno)
+values(16, 0, 'Pesquisa de Grupo de Usuários', 'SELECT ICODIGO AS CODIGO, SNOME AS NOME FROM TBGRUPOUSUARIOS', 'SNOME', 'WHERE SSTATUS = ''A''', 'CODIGO');
+
+delete from tbusuario;
+alter table tbusuario
+	add igrupousuario integer not null;
+	
+alter table tbusuario
+	add CONSTRAINT fktbusario_tbgrupousuario FOREIGN KEY (igrupousuario)
+	      REFERENCES tbgrupousuario (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION;

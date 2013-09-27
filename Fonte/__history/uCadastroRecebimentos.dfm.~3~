@@ -1,0 +1,112 @@
+inherited frmCadastroRecebimentos: TfrmCadastroRecebimentos
+  Caption = 'Recebimentos'
+  OnShow = FormShow
+  ExplicitWidth = 623
+  ExplicitHeight = 445
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited JvNavPaneToolPanel1: TJvNavPaneToolPanel
+    inherited pn: TPanel
+      ExplicitWidth = 613
+      inherited btnGrava: TcxButton
+        ExplicitLeft = 9
+      end
+      inherited btnCancela: TcxButton
+        ExplicitLeft = 312
+      end
+      inherited brnDeleta: TcxButton
+        ExplicitLeft = 413
+      end
+      inherited BtnSair: TcxButton
+        ExplicitLeft = 514
+      end
+      inherited btnExportar: TcxButton
+        ExplicitLeft = 211
+      end
+      inherited btnImprimir: TcxButton
+        ExplicitLeft = 110
+      end
+    end
+    object cxGrid1: TcxGrid
+      Left = 2
+      Top = 33
+      Width = 613
+      Height = 348
+      Align = alClient
+      TabOrder = 1
+      ExplicitLeft = 1
+      ExplicitTop = 31
+      object cxGrid1DBTableView1: TcxGridDBTableView
+        Navigator.Buttons.CustomButtons = <>
+        DataController.DataSource = DataSource1
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        OptionsView.GroupByBox = False
+        Styles.Content = cxStyle1
+        Styles.Header = cxStyle2
+        object cxGrid1DBTableView1FormaRecebimento: TcxGridDBColumn
+          Caption = 'Forma de Recebimento'
+          DataBinding.FieldName = 'FormaRecebimento'
+          Width = 312
+        end
+        object cxGrid1DBTableView1Valor: TcxGridDBColumn
+          DataBinding.FieldName = 'Valor'
+          Width = 224
+        end
+      end
+      object cxGrid1Level1: TcxGridLevel
+        GridView = cxGrid1DBTableView1
+      end
+    end
+  end
+  inherited SaveDlg: TSaveDialog
+    Left = 568
+    Top = 352
+  end
+  object cxStyleRepository1: TcxStyleRepository
+    Left = 56
+    Top = 328
+    PixelsPerInch = 96
+    object cxStyle1: TcxStyle
+      AssignedValues = [svFont]
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -40
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+    end
+    object cxStyle2: TcxStyle
+      AssignedValues = [svFont]
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+    end
+  end
+  object DataSource1: TDataSource
+    DataSet = SQLMemTable1
+    Left = 208
+    Top = 336
+  end
+  object SQLMemTable1: TSQLMemTable
+    CurrentVersion = '6.00 '
+    DatabaseName = 'MEMORY'
+    ReadOnly = False
+    CaseInsensitive = False
+    TableName = 'Table293319707_8016'
+    Exclusive = False
+    MemoryTableAllocBy = 1000
+    Left = 120
+    Top = 240
+    object SQLMemTable1FormaRecebimento: TStringField
+      FieldName = 'FormaRecebimento'
+      Size = 50
+    end
+    object SQLMemTable1Valor: TFloatField
+      FieldName = 'Valor'
+      DisplayFormat = '#,##0.00'
+    end
+  end
+end

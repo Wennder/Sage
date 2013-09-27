@@ -1,0 +1,2 @@
+﻿UPDATE tbpessoa SET snome = UPPER(snome);
+update tbramoatividade set sdescricao = upper(sdescricao);

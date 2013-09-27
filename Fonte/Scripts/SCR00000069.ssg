@@ -1,0 +1,240 @@
+﻿/************************************************************
+ * Autor.....: Jeimyson Souza
+ * Data......: 27/05/2013 21:48:53
+ * Banco.....: Todos
+ * Objetivo..:  Script Oficial 69 (SAGE)
+************************************************************/
+/*
+DROP VIEW IF EXISTS vwDevolucaoVenda;
+DROP VIEW IF EXISTS vwDevolucaoVendaItens;
+DROP VIEW IF EXISTS vwDevolucaoPedidoItem;
+DROP TABLE IF EXISTS tbdevolucaovendaitens;
+DROP TABLE IF EXISTS tbdevolucaovenda;
+ALTER TABLE tbpedido DROP CONSTRAINT IF EXISTS tbpedido_notafiscal;
+DROP TABLE IF EXISTS tbnotafiscal; 
+*/
+
+/*
+* Cria tabela de Nota Fiscal.
+*/
+CREATE TABLE IF NOT EXISTS tbnotafiscal
+(
+	icodigo         serial NOT NULL,	-- Codigo identificador da tabela
+	iempresa	INTEGER  NOT NULL,	-- Codigo da Empresa
+	inotafiscal     INTEGER NOT NULL,	-- Numero da Nota Fiscal
+	schave          VARCHAR (100) NULL, -- Chave da NF de devolução de venda.
+	slote           VARCHAR (20) NULL,	-- Lote da NF de devolução de venda.
+	ssituacao       VARCHAR(1) NOT NULL DEFAULT 'P', -- Situacao da NFe. (A = Autorizada / P  = Pendente / R = Rejeitada)
+	ddataenvio	TIMESTAMP WITHOUT TIME ZONE,	-- Data de Envio da NFe para Sefaz
+	
+	CONSTRAINT tbnotafiscal_pkey PRIMARY KEY (icodigo),
+	
+	CONSTRAINT tbnotafiscal_tbempresa FOREIGN KEY (iempresa)
+	REFERENCES tbempresa (iempresa) MATCH SIMPLE	
+	ON UPDATE NO ACTION ON DELETE NO ACTION
+	
+) WITH (OIDS = FALSE);
+SELECT setval ('tbnotafiscal_icodigo_seq', 1);
+
+ALTER TABLE tbnotafiscal
+  OWNER TO postgres;
+COMMENT ON COLUMN tbnotafiscal.icodigo IS 'código identificador da tabela';
+COMMENT ON COLUMN tbnotafiscal.iempresa IS 'Codigo da Empresa';
+COMMENT ON COLUMN tbnotafiscal.inotafiscal IS 'Numero da Nota Fiscal';
+COMMENT ON COLUMN tbnotafiscal.schave IS 'Chave da NF de devolução de venda.';
+COMMENT ON COLUMN tbnotafiscal.slote IS 'Lote da NF de devolução de venda.';
+COMMENT ON COLUMN tbnotafiscal.ssituacao IS 'Situacao da NFe. (A = Autorizada / P  = Pendente / R = Rejeitada).';
+COMMENT ON COLUMN tbnotafiscal.ddataenvio IS 'Data de Envio da NFe para Sefaz.';
+
+/*
+* Cria tabela de Devolucao de Vendas
+*/
+CREATE TABLE IF NOT EXISTS tbdevolucaovenda
+(
+	icodigo             serial NOT NULL,	-- Codigo da devolucao
+	iempresa	    INTEGER NOT NULL,    -- Codigo da Empresa
+	ddataoperacao       TIMESTAMP WITHOUT TIME ZONE,	-- Data da digitacao
+	sstatus             CHARACTER (1) NOT NULL DEFAULT 'A', -- situacao da devolucao (A=Ativa / I=Inativa),
+	idusuariocad        INTEGER NOT NULL DEFAULT 0,	-- indica o usuário que registrou a entrada.
+	idusuarioultalt     INTEGER,	-- indica o código do usuário que alterou/cancelou da entrada.
+	datahoraultalt      TIMESTAMP WITHOUT TIME ZONE,	-- data e hora da alteração/cancelamento da entrada.
+	iNaturezaOp         INTEGER NOT NULL,	-- Natureza de Operação.
+	iCfop               INTEGER NOT NULL,	--CFOP.	
+	ipedido             INTEGER NOT NULL,	-- Número do pedido original da venda.
+	sobservacao         TEXT NULL,	-- Observações da devolução de venda.
+	icodnotafiscal      INTEGER NOT NULL,	--Código do identificador do número da nota fiscao (tbnotafiscal).
+	
+	CONSTRAINT tbdevolucaovenda_pkey PRIMARY KEY (icodigo),
+
+	CONSTRAINT tbdevolucaovenda_tbempresa FOREIGN KEY (iempresa)
+	REFERENCES tbempresa (iempresa) MATCH SIMPLE	
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT tbdevolucaovenda_natureza FOREIGN KEY (iNaturezaOp)
+	REFERENCES tbnatureza (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT tbdevolucaovenda_cfop FOREIGN KEY (icfop)
+	REFERENCES tbcodigofiscal (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT tbdevolucaovenda_usuarioalt FOREIGN KEY (idusuarioultalt)
+	REFERENCES tbusuario (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT tbdevolucaovenda_usuariocad FOREIGN KEY (idusuariocad)
+	REFERENCES tbusuario (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT tbdevolucaovenda_pedido FOREIGN KEY (ipedido)
+	REFERENCES tbpedido (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+	CONSTRAINT tbdevolucaovenda_notafiscal FOREIGN KEY (icodnotafiscal)
+	REFERENCES tbnotafiscal (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION
+) WITH (OIDS = FALSE);
+
+ALTER TABLE tbdevolucaovenda
+  OWNER TO postgres;
+COMMENT ON COLUMN tbdevolucaovenda.icodigo IS 'código da devolucao de venda';
+COMMENT ON COLUMN tbdevolucaovenda.icodigo IS 'código da empresa.';
+COMMENT ON COLUMN tbdevolucaovenda.ddataoperacao IS 'data da digitação';
+COMMENT ON COLUMN tbdevolucaovenda.sstatus IS 'Status da devolução (A = Ativo / I = Inativo/Cancelada)';
+COMMENT ON COLUMN tbdevolucaovenda.idusuariocad IS 'indica o usuário que registrou a devolução da venda.';
+COMMENT ON COLUMN tbdevolucaovenda.idusuarioultalt IS 'indica o código do usuário que alterou/cancelou a devolução.';
+COMMENT ON COLUMN tbdevolucaovenda.datahoraultalt IS 'data e hora da alteração/cancelamento da devolução.';
+COMMENT ON COLUMN tbdevolucaovenda.ipedido IS 'indica o pedido origem referente a venda.';
+COMMENT ON COLUMN tbdevolucaovenda.icodnotafiscal IS 'indica o código do identificador do número da nota fiscao (tbnotafiscal)';
+SELECT setval ('tbdevolucaovenda_icodigo_seq', 1);
+
+/*
+* Cria tabela de Itens da Devolucao de Venda
+*/
+CREATE TABLE IF NOT EXISTS tbdevolucaovendaitens
+(
+	icodigo           serial NOT NULL,	-- CÓDIGO IDENTIFICADOR DA TABELA
+	idevvenda         INT NOT NULL,	-- CÓDIGO DA DEVOLUCAO (FK)
+	iproduto          INT NOT NULL,	-- CÓDIGO DO PRODUTO (FK)
+	nqtddevolvida     NUMERIC (12, 2) NOT NULL DEFAULT 0,	-- Qtd. Devolvida
+	CONSTRAINT tbdevolucaovendaietns_pkey PRIMARY KEY (icodigo),
+	CONSTRAINT tbdevolucaovendaitens_tbdevolucaovenda FOREIGN KEY (idevvenda)
+	REFERENCES tbdevolucaovenda (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION,
+	CONSTRAINT tbdevolucaovendaitens_tbproduto FOREIGN KEY (iproduto)
+	REFERENCES tbproduto (icodigo) MATCH SIMPLE
+	ON UPDATE NO ACTION ON DELETE NO ACTION
+) WITH (OIDS = FALSE);
+
+ALTER TABLE tbdevolucaovendaitens
+  OWNER TO postgres;
+COMMENT ON COLUMN tbdevolucaovendaitens.icodigo IS 'código identificador da tabela';
+COMMENT ON COLUMN tbdevolucaovendaitens.idevvenda IS 'código da devolução (FK)';
+COMMENT ON COLUMN tbdevolucaovendaitens.iproduto IS 'código do produto (FK)';
+COMMENT ON COLUMN tbdevolucaovendaitens.nqtddevolvida IS 'quantidade devolvida.';	
+SELECT setval ('tbdevolucaovendaitens_icodigo_seq', 1);
+
+/*
+* Cria View de Devolucao de Vendas
+*/
+CREATE OR REPLACE VIEW vwDevolucaoVenda
+AS
+SELECT dv.icodigo,
+	   dv.iempresa,
+	   dv.ddataoperacao,
+	   dv.sstatus,
+	   dv.idusuariocad,
+	   dv.idusuarioultalt,
+	   dv.datahoraultalt,
+	   dv.inaturezaop,
+	   n.sdescricao   AS snaturezaop,
+	   dv.icfop,
+	   cf.sdescricao  AS scfop,
+	   cf.nicmspf,
+	   cf.nicmspj,
+	   dv.ipedido,
+	   nf.inotafiscal,
+	   nf.schave,
+	   nf.slote,
+	   dv.sobservacao,
+	   c.snome        AS scliente,
+	   p.icliente FROM tbdevolucaovenda dv
+INNER JOIN tbempresa e ON e.iempresa = dv.iempresa
+LEFT JOIN tbnotafiscal nf ON nf.icodigo = dv.icodnotafiscal
+LEFT JOIN tbnatureza n ON n.icodigo = dv.inaturezaop
+LEFT JOIN tbcodigofiscal cf ON cf.icodigo = dv.icfop
+LEFT JOIN tbpedido p ON p.icodigo = dv.ipedido
+LEFT JOIN tbpessoa c ON c.icodigo = p.icliente;
+
+/*
+* Cria View de Itens da Devolucao de Vendas
+*/
+CREATE OR REPLACE VIEW vwDevolucaoVendaItens
+AS
+SELECT ii.icodigo,
+	   ii.idevvenda,
+	   i.ipedido,
+	   ii.iproduto,
+	   ii.nqtddevolvida,
+	   pdi.nquantidade  AS qtdvendida,
+	   (ii.nqtddevolvida - pdi.nquantidade) AS qtdadevolver,
+	   i.ddataoperacao,
+	   i.sstatus,
+	   CAST(
+	   	CASE 
+	   		WHEN i.sstatus = 'A' THEN 'Aberto'
+	   		WHEN i.sstatus = 'I' THEN 'Inativo'
+	   	END  AS VARCHAR (10)
+	   )                AS nmstatus,
+	   i.idusuariocad,
+	   i.idusuarioultalt,
+	   i.datahoraultalt,
+	   p.sreferencia,
+	   p.sfabricacao,
+	   p.sdescricao     AS nmproduto,
+	   p.sdescricao || ' - ' || m.sdescricao || ' ' || p.sreferencia AS 
+	   nmprodutocommarca,
+	   p.isubgrupo,
+	   s.sdescricao     AS nmsubgrupo,
+	   p.igrupo,
+	   g.sdescricao     AS nmgrupo,
+	   p.imarca,
+	   m.sdescricao     AS nmmarca FROM tbdevolucaovendaitens ii
+INNER JOIN tbdevolucaovenda i ON i.icodigo = ii.idevvenda
+INNER JOIN tbpedido pd ON pd.icodigo = i.ipedido
+INNER JOIN tbpedidoitens pdi ON pdi.ipedido = i.ipedido AND pdi.iproduto = ii.iproduto
+INNER JOIN tbproduto p ON p.icodigo = ii.iproduto
+INNER JOIN tbsubgrupo s ON s.icodigo = p.isubgrupo AND s.igrupo = p.igrupo
+INNER JOIN tbgrupo g ON g.icodigo = p.igrupo
+INNER JOIN tbmarca m ON m.icodigo = p.imarca;
+
+/*
+* Cria View de Integracao Pedido Origem x Devolucao.
+*/
+CREATE OR REPLACE VIEW vwDevolucaoPedidoItem
+AS
+SELECT PI.ipedido,
+	   PI.iproduto,
+	   PI.nquantidade  AS nqtdvendido,
+	   PI.nvalor       AS nvalorvendido,
+	   dvi.icodigo,
+	   dvi.idevvenda,
+	   CAST (COALESCE (dvi.nqtddevolvida, 0) AS NUMERIC (12, 2)) AS 
+	   nqtddevolvida,
+	   (PI.nquantidade - COALESCE (dvi.nqtddevolvida, 0)) AS nqtddevolver,
+	   p.sreferencia,
+	   p.sfabricacao,
+	   p.sdescricao    AS nmproduto,
+	   p.sdescricao || ' - ' || m.sdescricao || ' ' || p.sreferencia AS 
+	   nmprodutocommarca,
+	   p.isubgrupo,
+	   s.sdescricao    AS nmsubgrupo,
+	   p.igrupo,
+	   g.sdescricao    AS nmgrupo,
+	   p.imarca,
+	   m.sdescricao    AS nmmarca FROM tbpedidoitens PI
+LEFT JOIN tbdevolucaovendaitens dvi ON dvi.iproduto = PI.iproduto
+INNER JOIN tbproduto p ON p.icodigo = pi.iproduto
+INNER JOIN tbsubgrupo s ON s.icodigo = p.isubgrupo AND s.igrupo = p.igrupo
+INNER JOIN tbgrupo g ON g.icodigo = p.igrupo
+INNER JOIN tbmarca m ON m.icodigo = p.imarca;

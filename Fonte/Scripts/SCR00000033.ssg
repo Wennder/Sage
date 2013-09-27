@@ -1,0 +1,8 @@
+alter table tbpedido
+add ivendedor integer null;
+
+
+alter table tbpedido
+add CONSTRAINT fktbpedidotbcomissionado FOREIGN KEY (ivendedor)
+      REFERENCES tbcomissionado (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION;

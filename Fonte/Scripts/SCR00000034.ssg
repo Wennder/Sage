@@ -1,0 +1,2 @@
+alter table tbreccontaorigem
+add sstatus varchar(1) not null default 'A';

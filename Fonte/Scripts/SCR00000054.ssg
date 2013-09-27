@@ -1,0 +1,16 @@
+﻿CREATE OR REPLACE FUNCTION script_54() RETURNS void AS
+$$
+BEGIN
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbpesquisa'
+			  AND  column_name = 'frmcadastro' 
+			)
+	THEN
+		ALTER TABLE tbpesquisa ADD COLUMN frmCadastro varchar(800) NULL;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_54();
+DROP FUNCTION script_54();

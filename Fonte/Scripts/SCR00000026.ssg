@@ -1,0 +1,19 @@
+create table tbplaca(
+	icodigo integer not null,
+	splaca varchar(15) not null,
+	sveiculo varchar(30),
+	nKm numeric(12,2) not null default 0,
+	icliente integer not null,
+	sstatus varchar(1) not null default 'A',
+	constraint tbplaca_key primary key (icodigo),
+	constraint fktbplacatbcliente foreign key (icliente) references tbcliente(icodigo)
+);
+
+
+comment on table tbplaca is 'TABELA DE PLACAS POR CLIENTE';
+comment on column tbplaca.icodigo is 'campo identificador da tabela';
+comment on column tbplaca.splaca is 'descricao da placa';
+comment on column tbplaca.sveiculo is 'descricao do veiculo';
+comment on column tbplaca.nkm is 'kilometragem do veiculo';
+comment on column tbplaca.icliente is 'codigo do cliente relacionado a placa';
+comment on column tbplaca.sstatus is 'A = Ativo I = Inativo';

@@ -1,0 +1,2 @@
+insert into tbpesquisa(icodigo, iteclas, sdescricao, scomando, scampo, sparametrocomplementar, scamporetorno)
+values(17,0,'Pesquisa de NCM/SH','SELECT ICODIGO AS CODIGO, SDESCRICAO AS DESCRICAO FROM TBNCM', 'SDESCRICAO', 'WHERE SSTATUS = ''A''', 'CODIGO')

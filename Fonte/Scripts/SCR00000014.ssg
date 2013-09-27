@@ -1,0 +1,15 @@
+--Autor: André Luis
+--Data de criação: 22/07/2006 - 13:52
+--Objetivo: CRIA O CAMPO SSERVICO QUE IDENTIFICA SE O RESGISTRO É UM SERVIÇO OU UM PRODUTO
+
+
+Alter Table TbProduto
+Add Column sServico char(1) default 'N';
+
+update tbProduto set sServico = 'N';
+
+Alter Table TbProduto
+ALTER Column sServico SET NOT NULL;
+
+COMMENT ON COLUMN TBPRODUTO.SSERVICO IS 'S = SERVICO - N = PRODUTO';
+

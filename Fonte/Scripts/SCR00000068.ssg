@@ -1,0 +1,31 @@
+﻿/************************************************************
+ * Autor........: Jeimyson Souza
+ * Modulo.......: Estoque
+ * Data/Hora....: 28/05/2013 20:13:00
+ * Obj. Alt.....: Criar Pesquisa de Inventario.
+ ************************************************************/
+
+CREATE OR REPLACE FUNCTION script_68
+(
+)
+RETURNS void
+AS
+$$
+BEGIN
+		IF NOT EXISTS(
+		       SELECT NULL
+		       FROM   tbpesquisa
+		       WHERE  sdescricao = 'Pesquisa de Inventário'
+		   )
+		   THEN
+		   INSERT INTO tbpesquisa 
+		   		(iteclas ,sdescricao ,scomando ,scampo ,sparametrocomplementar ,scamporetorno ,frmcadastro)
+		   VALUES 
+		   		(0 ,'Pesquisa de Inventário' ,
+		   		'select i.icodigo as "Cód.", i.ddataoperacao as "Dt.Abertura", i.sstatus, i.nmstatus as "Sit.", i.nmusuariocad as "Aberto-Por", i.nmusuarioalt as "Fechado-Por", i.datahoraultalt as "Dt.Ult.Alteração", i.ddatafechamento as "Dt.Fechamento" from vwinventario i' ,
+		   		'icodigo' ,NULL ,'Cód.;sstatus;Dt.Abertura;Dt.Fechamento' ,NULL);
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_68();
+DROP FUNCTION script_68();

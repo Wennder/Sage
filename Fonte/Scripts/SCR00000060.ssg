@@ -1,0 +1,132 @@
+﻿DROP SEQUENCE IF EXISTS tbpesquisa_icodigo_seq CASCADE;
+CREATE SEQUENCE tbpesquisa_icodigo_seq;
+SELECT setval('tbpesquisa_icodigo_seq', (SELECT COALESCE(MAX(icodigo),1) FROM tbpesquisa));
+ALTER TABLE tbpesquisa ALTER COLUMN icodigo SET DEFAULT nextval('tbpesquisa_icodigo_seq');
+
+CREATE OR REPLACE FUNCTION script_60() RETURNS void AS
+$$
+BEGIN
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbscript'
+			)
+	THEN
+		CREATE TABLE tbscript(
+			   idscript Serial,
+			   nmscript VARCHAR(300) NOT NULL,
+			   dataexecucao timestamp NOT NULL,       
+			   idusuario integer NOT NULL,
+			   conteudo text NOT NULL,
+			   PRIMARY KEY(idscript)
+		   );
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbpesquisa
+			WHERE  sdescricao = 'Pesquisa de NF de Entrada'
+			)
+	THEN
+		insert into tbpesquisa (iteclas, sdescricao, scomando,scampo,sparametrocomplementar,scamporetorno,frmcadastro)
+		values
+		(0,'Pesquisa de NF de Entrada', 
+		'select 
+			e.Serie as "Serie",
+			e.Numero as "NF",
+			e.DataEntrada as "Dt.Entrada",
+			e.DataEmissao as "Dt.Emissão", 
+			e.dDataOperacao as "Dt.Operação",
+			e.ntotal as "Valor",
+			cast(case when sstatus = ''A'' then ''Ativa'' else ''Cancelada'' end as varchar(10)) as "Situação"
+		from tbentrada e',
+		'Serie', Null, 'Serie', Null);
+	END IF;
+
+	update tbpesquisa set scamporetorno = 'Serie;NF;Dt.Entrada;Dt.Emissão'
+	where icodigo = 21;
+
+	update tbconsumidor set snome = 'CONSUMIDOR'
+	where length(snome) = 0;
+
+	update tbpesquisa set 
+		scamporetorno = 'Placa;Veiculo;Km', 
+		scomando = 'SELECT ICODIGO AS CODIGO, SPLACA AS PLACA, SVEICULO AS VEICULO, nkm as KM FROM TBPLACA'
+	where icodigo = 14;
+		
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbparametro
+			WHERE  sparametro = 'CodCFOPVendaFora'
+			)
+	THEN
+		insert into tbparametro (sdescricao, sparametro, svalor, iempresa)
+		values ('Código padrão do CFOP para Venda fora do Estado', 'CodCFOPVendaFora', '6102',1);
+	END IF;		
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'idusuariocad'
+			)
+	THEN
+		ALTER TABLE tbentrada ADD COLUMN idusuariocad INT DEFAULT 0 NOT NULL;
+		comment ON COLUMN tbentrada.idusuariocad IS 'indica o usuário que registrou a entrada.';
+	END IF;
+
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'idusuarioultalt'
+			)
+	THEN
+		ALTER TABLE tbentrada ADD COLUMN idusuarioultalt INT NULL;
+		comment ON COLUMN tbentrada.idusuarioultalt IS 'indica o código do usuário que alterou/cancelou da entrada.';
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'datahoraultalt'
+			)
+	THEN
+		ALTER TABLE tbentrada ADD COLUMN datahoraultalt timestamp NULL;
+		comment ON COLUMN tbentrada.datahoraultalt IS 'data e hora da alteração/cancelamento da entrada.';
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentrada'
+			  AND  constraint_name = 'tbentrada_usuariocad'
+			)
+	THEN
+		ALTER TABLE tbentrada
+		ADD CONSTRAINT tbentrada_usuariocad FOREIGN KEY(idusuariocad)
+			REFERENCES tbusuario(icodigo) MATCH SIMPLE ON
+			UPDATE NO ACTION ON 
+			DELETE NO ACTION;		
+	END IF;
+		
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentrada'
+			  AND  constraint_name = 'tbentrada_usuarioalt'
+			)
+	THEN
+		ALTER TABLE tbentrada
+		ADD CONSTRAINT tbentrada_usuarioalt FOREIGN KEY(idusuarioultalt)
+			REFERENCES tbusuario(icodigo) MATCH SIMPLE ON
+			UPDATE NO ACTION ON 
+			DELETE NO ACTION;		
+	END IF;	
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_60();
+DROP FUNCTION script_60();

@@ -1,0 +1,17 @@
+CREATE OR REPLACE FUNCTION script_63() RETURNS void AS
+$$
+BEGIN
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbscript'
+			  AND  column_name = 'nmsctipt'
+			)
+	THEN
+		ALTER TABLE tbscript RENAME nmsctipt TO nmscript;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_63();
+DROP FUNCTION script_63();

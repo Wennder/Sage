@@ -1,0 +1,40 @@
+--Autor: André Luis
+--Data de criação: 18/07/2006 - 21:38
+--Objetivo: CRIA A TABELA DE ITENS DA TABELA DE PREÇO
+
+CREATE TABLE tbtabelaprecoitens
+(
+  icodigo int4 NOT NULL, -- CODIGO DO ITEM NA TABELA
+  itabela int4 NOT NULL, -- CODIGO DA TABELA DE PREÇO
+  iproduto int4 NOT NULL, -- CODIGO DO PRODUTO
+  npreco numeric(12,2) NOT NULL DEFAULT 0, -- PREÇO FINAL DO PRODUTO
+  sstatus char(1) NOT NULL DEFAULT 'A'::bpchar, -- A= ATIVO - I = INTATIVO
+  CONSTRAINT tbtabelaprecoitens_pkey PRIMARY KEY (icodigo),
+  CONSTRAINT fktbtabelaprecoitenstbproduto FOREIGN KEY (iproduto)
+      REFERENCES tbproduto (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT fktbtabelaprecoitenstbtabelapreco FOREIGN KEY (itabela)
+      REFERENCES tbtabelapreco (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+) 
+WITHOUT OIDS;
+ALTER TABLE tbtabelaprecoitens OWNER TO postgres;
+COMMENT ON TABLE tbtabelaprecoitens IS 'TABELA DE ITENS DA TABELA DE PREÇOS';
+COMMENT ON COLUMN tbtabelaprecoitens.icodigo IS 'CODIGO DO ITEM NA TABELA';
+COMMENT ON COLUMN tbtabelaprecoitens.itabela IS 'CODIGO DA TABELA DE PREÇO';
+COMMENT ON COLUMN tbtabelaprecoitens.iproduto IS 'CODIGO DO PRODUTO';
+COMMENT ON COLUMN tbtabelaprecoitens.npreco IS 'PREÇO FINAL DO PRODUTO';
+COMMENT ON COLUMN tbtabelaprecoitens.sstatus IS 'A= ATIVO - I = INTATIVO';
+
+
+-- Index: idxtabelaproduto
+
+-- DROP INDEX idxtabelaproduto;
+
+CREATE UNIQUE INDEX idxtabelaproduto
+  ON tbtabelaprecoitens
+  USING btree
+  (itabela, iproduto);
+
+
+

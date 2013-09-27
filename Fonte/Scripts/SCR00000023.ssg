@@ -1,0 +1,10 @@
+--Autor: André Luis
+--Data de criação: 06/03/2007 - 23:30
+
+alter table tbpedido
+add bPedido boolean;
+
+update tbpedido set bPedido = true;
+
+alter table tbpedido
+alter column bPedido set not null;

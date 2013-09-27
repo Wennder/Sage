@@ -1,0 +1,2 @@
+alter table tbpesquisa
+alter sdescricao type varchar(80)

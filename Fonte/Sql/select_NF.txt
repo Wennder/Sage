@@ -1,0 +1,44 @@
+SELECT tbnatureza.sdescricao  AS Natureza_Operacao,
+	   tbpedido.icfop         AS CFOP,
+	   COALESCE (tbpessoajuridica.srazaosocial, tbpessoa.snome) AS nome,
+	   tbpessoa.sendereco,
+	   tbpessoa.sbairro,
+	   tbpessoa.scep,
+	   COALESCE (tbpessoafisica.scpf, tbpessoajuridica.scnpj) AS cpf_cnpj,
+	   tbcidade.snome         AS cidade,
+	   tbcidade.suf,
+	   tbpessoa.sfone,
+	   COALESCE (tbpessoajuridica.sinscestadual, tbpessoafisica.srg) AS 
+	   sinscestadual,
+	   tbproduto.sdescricao || ' - ' || tbproduto.sreferencia AS sdescricao,
+	   tbmarca.sdescricao     AS marca,
+	   tbproduto.icodigo,
+	   tbproduto.incm,
+	   tbunidade.sdescricao   AS unidade,
+	   tbpedidoitens.nquantidade,
+	   tbpedidoitens.nvalor,
+	   tbpedidoitens.nquantidade *
+	   tbpedidoitens.nvalor   AS totalitem,
+	   tbpedido.ddatapedido,
+	   tbcodigofiscal.nicmspf,
+	   tbcodigofiscal.nicmspj,
+	   tbpedido.sobservacao,
+	   tbpedido.najustepercentual,
+	   tbpedido.najustevalor,
+	   tbcidade.scodibge,
+	   tbpedido.icodigo       AS pedido,
+	   nf.inotafiscal         AS B_NNF FROM tbpedido
+JOIN tbpedidoitens ON tbpedidoitens.ipedido = tbpedido.icodigo
+LEFT JOIN tbnotafiscal nf ON nf.icodigo = tbpedido.icodnotafiscal
+JOIN tbcliente ON tbcliente.icodigo = tbpedido.icliente
+JOIN tbpessoa ON tbpessoa.icodigo = tbcliente.icodigo
+JOIN tbproduto ON tbproduto.icodigo = tbpedidoitens.iproduto
+JOIN tbnatureza ON tbnatureza.icodigo = tbpedido.inatureza
+LEFT OUTER JOIN tbpessoafisica ON tbpessoafisica.icodigo = tbpessoa.icodigo
+LEFT OUTER JOIN tbpessoajuridica ON tbpessoajuridica.icodigo = tbpessoa.icodigo
+JOIN tbcidade ON tbcidade.icodigo = tbpessoa.icidade
+JOIN tbunidade ON tbunidade.icodigo = tbproduto.iundsaida
+JOIN tbcodigofiscal ON tbcodigofiscal.icodigo = tbpedido.icfop
+JOIN tbmarca ON tbmarca.icodigo = tbproduto.imarca
+WHERE tbproduto.sservico = 'N'
+  AND tbpedido.icodigo = :Pedido

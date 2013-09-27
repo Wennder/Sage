@@ -1,0 +1,307 @@
+﻿/************************************************************
+ * Autor.....: Jeimyson Souza
+ * Data......: 26/05/2013 23:12:13
+ * Banco.....: Todos
+ * Objetivo..: Script Oficial 70 (SAGE)
+************************************************************/
+
+
+CREATE OR REPLACE FUNCTION script_70 ( )
+RETURNS void
+AS $$
+BEGIN
+	/*
+	- Cria coluna temporaria com número do pedido.
+	*/
+	IF  NOT EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbnotafiscal'
+	    	  AND COLUMN_NAME     = 'ipedido'
+	    )
+	THEN
+		ALTER TABLE tbnotafiscal ADD COLUMN ipedido INT NULL;
+	END IF;
+	
+	/*
+	- Insere NFs emitidas (tbpedido) na tabela nova de nota fiscal.
+	*/
+	IF  EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbpedido'
+	    	  AND COLUMN_NAME     = 'inotafiscal'
+	    )
+	THEN
+	INSERT INTO tbnotafiscal
+	(iempresa, inotafiscal, schave, slote, ipedido)
+	SELECT iempresa,
+		   inotafiscal,
+		   chave,
+		   lote,
+		   icodigo FROM tbpedido p
+	WHERE p.inotafiscal IS NOT NULL
+	  AND NOT EXISTS (
+	      	SELECT NULL FROM tbnotafiscal nf
+	      	WHERE nf.inotafiscal = p.inotafiscal
+	      	  AND nf.schave = p.chave
+	      	  AND nf.slote = p.lote
+	      	  AND nf.ipedido = p.icodigo
+	      )
+	ORDER BY
+		p.icodigo;
+	END IF;
+	
+	/*
+	- Cria coluna nova na tbpedido para relacionar com a tabela de NF.
+	*/
+	IF  NOT EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbpedido'
+	    	  AND COLUMN_NAME     = 'icodnotafiscal'
+	    )
+	THEN
+		ALTER TABLE tbpedido ADD COLUMN icodnotafiscal INT NULL;
+		COMMENT ON COLUMN tbpedido.icodnotafiscal IS 
+		'indica o identificador na tabela de nota fiscal.';
+	END IF;
+	
+	/*
+	- Cria Contraints tbpedido com tbnotafiscal.
+	*/
+	IF  NOT EXISTS(
+	    	SELECT NULL FROM information_schema.table_constraints
+	    	WHERE TABLE_NAME          = 'tbpedido'
+	    	  AND CONSTRAINT_NAME     = 'tbpedido_notafiscal'
+	    )
+	THEN
+		ALTER TABLE tbpedido
+		ADD CONSTRAINT tbpedido_notafiscal FOREIGN KEY (icodnotafiscal)
+		REFERENCES tbnotafiscal (icodigo) MATCH SIMPLE
+		ON
+		
+		UPDATE NO ACTION ON 
+		DELETE NO ACTION;
+	END IF; 
+	
+	/*
+	- Alimenta Código identificador da Nota Fiscal na tabela de Pedidos.
+	*/
+	UPDATE
+		tbpedido p
+	SET
+		icodnotafiscal = nf.icodigo
+		FROM tbnotafiscal nf
+	WHERE nf.ipedido = p.icodigo;
+	
+	/*
+	- Recria view de Pedidos.
+	*/ 
+	DROP VIEW IF EXISTS vwpedido;
+	
+	CREATE OR REPLACE VIEW vwpedido AS 
+	SELECT tbpedido.icodigo,
+		   tbpedido.iempresa,
+		   COALESCE (tbpedido.icliente, 0) AS icliente,
+		   tbpedido.ddatapedido,
+		   tbpedido.thorapedido,
+		   tbpedido.ntotalprodutos,
+		   tbpedido.najustepercentual,
+		   tbnatureza.sdescricao          AS natureza,
+		   tbpedido.icfop                 AS cfop,
+		   COALESCE(
+		   	COALESCE (tbconsumidor.snome, tbpessoa.snome),
+		   	'CONSUMIDOR'::CHARACTER VARYING
+		   )                              AS cliente,
+		   COALESCE (tbconsumidor.sendereco, tbpessoa.sendereco) AS sendereco,
+		   COALESCE (tbconsumidor.sbairro, tbpessoa.sbairro) AS sbairro,
+		   COALESCE (tbconsumidor.scep, tbpessoa.scep::CHARACTER VARYING) AS 
+		   scep,
+		   COALESCE (tbpessoafisica.scpf, tbpessoajuridica.scnpj) AS cpf_cnpj,
+		   COALESCE (tbcidadeconsumidor.snome, tbcidade.snome) AS cidade,
+		   COALESCE (tbcidadeconsumidor.suf, tbcidade.suf) AS suf,
+		   COALESCE (tbconsumidor.sfone, tbpessoa.sfone::CHARACTER VARYING) AS 
+		   sfone,
+		   tbpessoajuridica.sinscestadual,
+		   (tbproduto.sdescricao || ' - ') || tbproduto.sreferencia AS sdescricao,
+		   tbmarca.sdescricao             AS marca,
+		   tbproduto.icodigo              AS iproduto,
+		   tbunidade.sdescricao           AS unidade,
+		   tbcodigofiscal.nicmspf,
+		   tbcodigofiscal.nicmspj,
+		   tbpedido.sobservacao,
+		   tbpedidoitens.nquantidade,
+		   tbpedidoitens.nvalor,
+		   tbpedidoitens.nquantidade * tbpedidoitens.nvalor AS totalitem,
+		   CASE 
+		   	WHEN tbpedido.najustepercentual > 0::NUMERIC THEN tbpedidoitens.nquantidade 
+		   	     * tbpedidoitens.nvalor * (tbpedido.najustepercentual / 100::NUMERIC)
+		   	ELSE 0.00
+		   END                            AS totalacresc,
+		   CASE 
+		   	WHEN tbpedido.najustepercentual < 0::NUMERIC THEN tbpedidoitens.nquantidade 
+		   	     * tbpedidoitens.nvalor * (tbpedido.najustepercentual / 100::NUMERIC)
+		   	ELSE 0.00
+		   END                            AS totaldesc,
+		   (
+		   	tbpedidoitens.nvalor +
+		   	CASE 
+		   		WHEN tbpedido.najustepercentual < 0::NUMERIC THEN tbpedidoitens.nquantidade 
+		   		     * tbpedidoitens.nvalor * (tbpedido.najustepercentual / 100::NUMERIC) 
+		   		     / tbpedidoitens.nquantidade
+		   		ELSE 0.00
+		   	END  +
+		   	CASE 
+		   		WHEN tbpedido.najustepercentual > 0::NUMERIC THEN tbpedidoitens.nquantidade 
+		   		     * tbpedidoitens.nvalor * (tbpedido.najustepercentual / 100::NUMERIC) 
+		   		     / tbpedidoitens.nquantidade
+		   		ELSE 0.00
+		   	END 
+		   )::NUMERIC (12, 2)             AS nvalorcomajuste,
+		   (
+		   	tbpedidoitens.nquantidade * tbpedidoitens.nvalor + tbpedidoitens.nquantidade 
+		   	* tbpedidoitens.nvalor * (tbpedido.najustepercentual / 100::NUMERIC)
+		   )::NUMERIC (12, 2)             AS totalitemcomajuste,
+		   tbpedido.sstatus,
+		   CASE 
+		   	WHEN tbpedido.bpedido = TRUE AND tbpedido.icodnotafiscal IS NULL AND 
+		   	     COALESCE (tbpedido.bcupomfiscal, FALSE) 
+		   	     =
+		   	     FALSE THEN 'Pedido'::TEXT
+		   	WHEN tbpedido.bpedido = FALSE AND tbpedido.icodnotafiscal IS NULL 
+		   	     AND 
+		   	     COALESCE (tbpedido.bcupomfiscal, FALSE) 
+		   	     =
+		   	     FALSE THEN 'Orçamento'::TEXT
+		   	WHEN tbpedido.bpedido = TRUE AND tbpedido.icodnotafiscal IS NOT NULL 
+		   	     AND 
+		   	     COALESCE (tbpedido.bcupomfiscal, FALSE) 
+		   	     = FALSE THEN 'NF'::TEXT
+		   	WHEN tbpedido.bpedido = FALSE AND tbpedido.icodnotafiscal IS NULL 
+		   	     AND 
+		   	     COALESCE (tbpedido.bcupomfiscal, FALSE) 
+		   	     =
+		   	     TRUE THEN 'CF'::TEXT
+		   	ELSE NULL::TEXT
+		   END  ::CHARACTER VARYING (10)  AS tipo,
+		   nf.inotafiscal FROM tbpedido
+	JOIN tbpedidoitens ON tbpedidoitens.ipedido = tbpedido.icodigo
+	LEFT JOIN tbnotafiscal nf ON nf.icodigo = tbpedido.icodnotafiscal
+	LEFT JOIN tbcliente ON tbcliente.icodigo = tbpedido.icliente
+	LEFT JOIN tbpessoa ON tbpessoa.icodigo = tbcliente.icodigo
+	JOIN tbproduto ON tbproduto.icodigo = tbpedidoitens.iproduto
+	JOIN tbnatureza ON tbnatureza.icodigo = tbpedido.inatureza
+	LEFT JOIN tbpessoafisica ON tbpessoafisica.icodigo = tbpessoa.icodigo
+	LEFT JOIN tbpessoajuridica ON tbpessoajuridica.icodigo = tbpessoa.icodigo
+	LEFT JOIN tbcidade ON tbcidade.icodigo = tbpessoa.icidade
+	JOIN tbunidade ON tbunidade.icodigo = tbproduto.iundsaida
+	JOIN tbcodigofiscal ON tbcodigofiscal.icodigo = tbpedido.icfop
+	JOIN tbmarca ON tbmarca.icodigo = tbproduto.imarca
+	LEFT JOIN tbconsumidor ON tbconsumidor.ipedido = tbpedido.icodigo
+	LEFT JOIN tbcidade tbcidadeconsumidor ON tbcidadeconsumidor.icodigo =
+	     tbconsumidor.icidade
+	WHERE tbpedido.sstatus = 'A';
+	
+	/*
+	* Recria vw_saidas_produto
+	*/
+	DROP VIEW IF EXISTS vw_saidas_produto;
+	
+	CREATE OR REPLACE VIEW vw_saidas_produto AS 
+	SELECT tbpedido.ddatapedido,
+		   tbpedido.thorapedido,
+		   tbpedidoitens.iproduto,
+		   tbpedidoitens.nquantidade * (-1)::NUMERIC AS nquantidade,
+		   tbpedido.icodigo              AS ipedido,
+		   tbpedido.iempresa AS iempresa,
+		   COALESCE (nf.inotafiscal, 0)  AS inotafiscal FROM tbpedido
+	JOIN tbpedidoitens ON tbpedidoitens.ipedido = tbpedido.icodigo
+	LEFT JOIN tbnotafiscal nf ON nf.icodigo = tbpedido.icodnotafiscal
+	WHERE tbpedido.sstatus = 'A'::bpchar
+	  AND (tbpedido.iflagsituacao = ANY (ARRAY[2, 3, 4]))
+	ORDER BY
+		tbpedido.ddatapedido; 
+	
+	/*
+	- Apaga coluna temporaria com número do pedido.
+	*/
+	IF  EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbnotafiscal'
+	    	  AND COLUMN_NAME     = 'ipedido'
+	    )
+	THEN
+		ALTER TABLE tbnotafiscal 
+		DROP ipedido;
+	END IF; 
+	
+	/*
+	- Apaga coluna ref. dados das notas da tabela tbpedido
+	*/
+	IF  EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbpedido'
+	    	  AND COLUMN_NAME     = 'inotafiscal'
+	    )
+	THEN
+		ALTER TABLE tbpedido 
+		DROP inotafiscal;
+	END IF; 
+	
+	/*
+	- Apaga coluna ref. dados das notas da tabela tbpedido
+	*/
+	IF  EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbpedido'
+	    	  AND COLUMN_NAME     = 'chave'
+	    )
+	THEN
+		ALTER TABLE tbpedido 
+		DROP chave;
+	END IF; 
+	
+	/*
+	- Apaga coluna ref. dados das notas da tabela tbpedido
+	*/
+	IF  EXISTS(
+	    	SELECT NULL FROM information_schema.columns
+	    	WHERE TABLE_NAME      = 'tbpedido'
+	    	  AND COLUMN_NAME     = 'lote'
+	    )
+	THEN
+		ALTER TABLE tbpedido 
+		DROP lote;
+	END IF;
+	
+	/*
+	* Cria parametro de Modelo da NF
+	*/
+	
+	IF  NOT EXISTS(
+	    	SELECT NULL FROM tbparametro
+	    	WHERE sparametro = 'CodModNFE'
+	    )
+	THEN
+		INSERT INTO tbparametro
+		(sdescricao, sparametro, svalor, iempresa)
+		VALUES
+		('Código do Modelo de NFE', 'CodModNFE', '55', 1);
+	END IF;
+	
+	/*
+	* Cria parametro de Serie da NF
+	*/	
+	IF  NOT EXISTS(
+	    	SELECT NULL FROM tbparametro
+	    	WHERE sparametro = 'SerieNFE'
+	    )
+	THEN
+		INSERT INTO tbparametro
+		(sdescricao, sparametro, svalor, iempresa)
+		VALUES
+		('Série da NFE', 'SerieNFE', '1', 1);
+	END IF;	
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_70();
+
+DROP FUNCTION script_70();

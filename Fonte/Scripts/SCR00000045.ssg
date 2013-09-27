@@ -1,0 +1,3 @@
+delete from tbpesquisa where icodigo = 18;
+insert into tbpesquisa(icodigo, iteclas, sdescricao, scomando, scampo, sparametrocomplementar, scamporetorno)
+values(18, 0, 'Pesquisa de pedido com Cupom Fiscal', 'SELECT TBPEDIDO.ICODIGO AS PEDIDO, DDATAPEDIDO AS DATA, TBPEDIDO.ntotalprodutos AS VALOR, TBPEDIDO.scupomfiscal AS CUPOM_FISCAL, COALESCE(TBPESSOA.SNOME, TBCONSUMIDOR.SNOME) AS CLIENTE FROM TBPEDIDO LEFT OUTER JOIN TBPESSOA ON TBPESSOA.ICODIGO = TBPEDIDO.ICLIENTE LEFT OUTER JOIN TBCONSUMIDOR ON TBCONSUMIDOR.IPEDIDO = TBPEDIDO.ICODIGO', 'TBPEDIDO.ICODIGO', 'WHERE TBPEDIDO.SSTATUS=''A'' AND bcupomfiscal = TRUE', 'PEDIDO')

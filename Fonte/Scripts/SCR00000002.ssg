@@ -1,0 +1,3 @@
+delete from tbpesquisa;
+insert INTO tbpesquisa(iCodigo, iteclas, sdescricao, scomando, scampo,  sparametrocomplementar, scamporetorno)
+values(1,0,'Pesquisa de Cidades', 'SELECT ICODIGO AS CODIGO, SNOME AS NOME, SUF AS UF FROM TBCIDADE','SNOME','WHERE sstatus= ''A''','CODIGO')

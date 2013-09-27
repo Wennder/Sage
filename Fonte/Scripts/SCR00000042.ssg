@@ -1,0 +1,14 @@
+create table tbpedidoparcela(
+	icodigo integer,
+	ipedido integer,
+	sfatura varchar(100),
+	dvencimento date,
+	nvalor numeric(12,2) not null default 0.00,
+	primary key(icodigo)
+);
+
+comment on column tbpedidoparcela.icodigo is 'identificador da tabela';
+comment on column tbpedidoparcela.ipedido is 'referencia ao numero do pedido';
+comment on column tbpedidoparcela.sfatura is 'valor identificador da fatura';
+comment on column tbpedidoparcela.dvencimento is 'vencimento da fatura';
+comment on column tbpedidoparcela.nvalor is 'valor da fatura';

@@ -1,0 +1,10 @@
+create table tbrotinas(
+	icodigo integer,
+	sdescricao varchar(100),
+	sformulario varchar(100),
+	primary key (icodigo)	
+);
+
+comment on table tbrotinas is 'tabela de rotinas do sistema';
+comment on column tbrotinas.icodigo is 'codigo indentificador';
+comment on column tbrotinas.sdescricao is 'descricao da rotina';

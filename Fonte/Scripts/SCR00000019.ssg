@@ -1,0 +1,6 @@
+--Autor: André Luis
+--Data de criação: 27/08/2006 - 21:19
+
+alter table tbpedido
+add nAjustePercentual numeric(12,2) default 0;
+comment on column tbpedido.nAjustePercentual is 'Ajuste de valores na forma percentual'

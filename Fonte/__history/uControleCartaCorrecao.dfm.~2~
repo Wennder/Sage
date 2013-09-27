@@ -1,0 +1,37 @@
+inherited frmControleCartaCorrecao: TfrmControleCartaCorrecao
+  Caption = 'Carta de Corre'#231#227'o'
+  ClientHeight = 192
+  ExplicitWidth = 623
+  ExplicitHeight = 221
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited JvNavPaneToolPanel1: TJvNavPaneToolPanel
+    Height = 192
+    inherited pn: TPanel
+      Top = 157
+      ExplicitWidth = 613
+      inherited btnGrava: TcxButton
+        ExplicitLeft = 9
+      end
+      inherited btnCancela: TcxButton
+        ExplicitLeft = 312
+      end
+      inherited brnDeleta: TcxButton
+        ExplicitLeft = 413
+      end
+      inherited BtnSair: TcxButton
+        ExplicitLeft = 514
+      end
+      inherited btnExportar: TcxButton
+        ExplicitLeft = 211
+      end
+      inherited btnImprimir: TcxButton
+        ExplicitLeft = 110
+      end
+    end
+  end
+  inherited SaveDlg: TSaveDialog
+    Left = 480
+    Top = 312
+  end
+end

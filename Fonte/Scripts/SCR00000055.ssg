@@ -1,0 +1,82 @@
+﻿update tbpesquisa set frmCadastro = 'frmCadastroCidade'
+where icodigo = 1;
+
+update tbpesquisa set frmCadastro = 'frmCadastroGrupo'
+where icodigo = 2;
+
+update tbpesquisa set frmCadastro = 'frmCadastroMarca'
+where icodigo = 3;
+
+update tbpesquisa set frmCadastro = 'frmCadastroUnidade'
+where icodigo = 4;
+
+update tbpesquisa set frmCadastro = 'frmCadastroSubGrupo'
+where icodigo = 5;
+
+update tbpesquisa set frmCadastro = 'frmCadastroRamoAtividade'
+where icodigo = 6;
+
+update tbpesquisa set frmCadastro = 'frmCadastroComissionado'
+where icodigo = 7;
+
+update tbpesquisa set frmCadastro = 'frmCadastroProduto'
+where icodigo = 8;
+
+update tbpesquisa set frmCadastro = 'frmCadastroCliente'
+where icodigo = 9;
+
+update tbpesquisa set frmCadastro = 'frmCadastroTabelaPreco'
+where icodigo = 10;
+
+update tbpesquisa set frmCadastro = 'frmCadastroNaturezaOperacao'
+where icodigo = 11;
+
+update tbpesquisa set frmCadastro = 'frmCadastroCodigoFiscal'
+where icodigo = 12;
+
+update tbpesquisa set frmCadastro = 'frmPlacas'
+where icodigo = 14;
+
+update tbpesquisa set frmCadastro = 'frmCadastroUsuarios'
+where icodigo = 15;
+
+update tbpesquisa set frmCadastro = 'frmCadastroGrupoUsuario'
+where icodigo = 16;
+
+update tbpesquisa set frmCadastro = 'frmCadastroNCM'
+where icodigo = 17;
+
+update tbpesquisa set frmCadastro = 'frmCadastroFornecedor'
+where icodigo = 19;
+
+update tbpesquisa set frmCadastro = 'frmCadastroCor'
+where icodigo = 20;
+
+UPDATE TBNCM SET SDESCRICAO = UPPER(SDESCRICAO);
+
+UPDATE TBGRUPOUSUARIO SET SNOME = UPPER(SNOME);
+
+UPDATE TBCIDADE SET SNOME = UPPER(SNOME);
+
+update tbpesquisa set scomando = '
+SELECT tbpedido.ddatapedido AS DATA
+      ,tbpedido.icodigo AS Pedido
+      ,tbpedido.iNotafiscal AS NF
+      ,cast(CASE 
+            WHEN bpedido = ''t'' AND inotafiscal IS NULL AND COALESCE(bcupomfiscal, false) = ''f'' THEN ''Pedido''
+            WHEN bpedido = ''f'' AND inotafiscal IS NULL AND COALESCE(bcupomfiscal, false) = ''f'' THEN ''Orçamento''
+            WHEN bpedido = ''t'' AND inotafiscal IS NOT NULL AND COALESCE(bcupomfiscal, false) = ''f'' THEN ''NF''
+            WHEN bpedido = ''f'' AND inotafiscal IS NULL AND COALESCE(bcupomfiscal, false) = ''t'' THEN ''CF''
+            ELSE NULL
+       END as varchar(10)) AS Tipo
+      ,COALESCE(c.sNome, pc.snome, ''CONSUMIDOR'') AS Cliente
+FROM   tbpedido
+LEFT JOIN tbpessoa c ON c.icodigo = tbpedido.icliente
+LEFT JOIN tbconsumidor pc ON pc.ipedido = tbpedido.icodigo
+'
+where icodigo = 13;
+
+update tbconsumidor set snome = upper(snome);
+
+update tbparametro set svalor = 'Orcamento_Pedido_v2.rtm'
+where iparametro = 3;

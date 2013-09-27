@@ -1,0 +1,34 @@
+inherited frmCadastroGenerico1: TfrmCadastroGenerico1
+  Caption = 'frmCadastroGenerico1'
+  ExplicitWidth = 623
+  ExplicitHeight = 445
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited JvNavPaneToolPanel1: TJvNavPaneToolPanel
+    inherited pn: TPanel
+      ExplicitWidth = 613
+      inherited btnGrava: TcxButton
+        ExplicitLeft = 9
+      end
+      inherited btnCancela: TcxButton
+        ExplicitLeft = 312
+      end
+      inherited brnDeleta: TcxButton
+        ExplicitLeft = 413
+      end
+      inherited BtnSair: TcxButton
+        ExplicitLeft = 514
+      end
+      inherited btnExportar: TcxButton
+        ExplicitLeft = 211
+      end
+      inherited btnImprimir: TcxButton
+        ExplicitLeft = 110
+      end
+    end
+  end
+  inherited SaveDlg: TSaveDialog
+    Left = 568
+    Top = 352
+  end
+end

@@ -1,0 +1,3 @@
+ALTER TABLE tbentradaitens ADD CONSTRAINT tbentrada FOREIGN KEY (codigo) REFERENCES tbentrada (codigo)
+   ON UPDATE NO ACTION ON DELETE NO ACTION;
+CREATE INDEX fki_tbentrada ON tbentradaitens(codigo);

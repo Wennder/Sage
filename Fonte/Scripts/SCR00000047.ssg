@@ -1,0 +1,10 @@
+CREATE TABLE tbfornecedor(
+	iCodigo INTEGER,
+	iPessoa INTEGER,
+	PRIMARY KEY(iCodigo),
+	CONSTRAINT tbpessoa FOREIGN KEY (ipessoa)
+	REFERENCES tbpessoa (icodigo) MATCH SIMPLE	
+);
+COMMENT ON COLUMN tbfornecedor.icodigo IS 'CODIGO IDENTIFICADOR DA TABELA';
+COMMENT ON COLUMN tbfornecedor.ipessoa IS 'CODIGO DE LIGAÇÃO COM A TABELA TBPESSOA';
+CREATE INDEX idx_tbfornecedor_ipessoa ON tbfornecedor(ipessoa);

@@ -1,0 +1,22 @@
+create table tbcontroleacesso(
+	icodigo integer,
+	igrupousuario integer,
+	irotina integer,
+	primary key(icodigo)
+);
+
+comment on table tbcontroleacesso is 'tabela de controle de acesso';
+comment on column tbcontroleacesso.icodigo is 'codigo identificador da tabela';
+comment on column tbcontroleacesso.igrupousuario is 'codigo do grupo de usuario';
+comment on column tbcontroleacesso.irotina is 'codigo da rotina';
+
+alter table tbcontroleacesso
+add   CONSTRAINT fktbcontroleacessotbgrupoususario FOREIGN KEY (igrupousuario)
+      REFERENCES tbgrupousuario (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+alter table tbcontroleacesso
+add   CONSTRAINT fktbcontroleacessotbrotina FOREIGN KEY (irotina)
+      REFERENCES tbgrupousuario (icodigo) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+

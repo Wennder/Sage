@@ -1,0 +1,22 @@
+CREATE TABLE tbentrada
+(
+  codigo int4 NOT NULL, -- CODIGO IDENTIFICADOR DA TABELA
+  fornecedor int4, -- CODIGO DO FORNECEDOR
+  serie varchar(5), -- SERIE DA NF DE ENTRADA
+  numero int4, -- NUMERO DA NF DE ENTRADA
+  dataentrada date, -- DATA DE REALIZACAO DA ENTRADA, NOVIMENTACAO DE PRODUTOS
+  dataemissao date, -- DATA DE EMISSAO DE NF
+  datadigitacao timestamp, -- DATA DE DIGITACAO
+  ntotal numeric(12,2), -- TOTAL DA NF ENTRADA
+  CONSTRAINT tbentrada_pkey PRIMARY KEY (codigo)
+) 
+WITHOUT OIDS;
+ALTER TABLE tbentrada OWNER TO postgres;
+COMMENT ON COLUMN tbentrada.codigo IS 'CODIGO IDENTIFICADOR DA TABELA';
+COMMENT ON COLUMN tbentrada.fornecedor IS 'CODIGO DO FORNECEDOR';
+COMMENT ON COLUMN tbentrada.serie IS 'SERIE DA NF DE ENTRADA';
+COMMENT ON COLUMN tbentrada.numero IS 'NUMERO DA NF DE ENTRADA';
+COMMENT ON COLUMN tbentrada.dataentrada IS 'DATA DE REALIZACAO DA ENTRADA, NOVIMENTACAO DE PRODUTOS';
+COMMENT ON COLUMN tbentrada.dataemissao IS 'DATA DE EMISSAO DE NF';
+COMMENT ON COLUMN tbentrada.datadigitacao IS 'DATA DE DIGITACAO';
+COMMENT ON COLUMN tbentrada.ntotal IS 'TOTAL DA NF ENTRADA';

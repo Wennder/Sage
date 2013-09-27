@@ -1,0 +1,52 @@
+insert into tbuf (codigoibge, nmestado, uf)
+values ('12','Acre','AC');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('13','Amazonas','AM');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('14','Roraima','RR');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('15','Pará','PA');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('16','Amapá','AP');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('17','Tocantins','TO');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('21','Maranhão','MA');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('22','Piauí','PI');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('23','Ceará','CE');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('24','Rio Grande do Norte','RN');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('25','Paraíba','PB');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('26','Pernambuco','PE');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('27','Alagoas','AL');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('28','Sergipe','SE');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('29','Bahia','BA');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('31','Minas Gerais','MG');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('32','Espírito Santo','ES');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('33','Rio de Janeiro','RJ');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('35','São Paulo','SP');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('41','Paraná','PR');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('42','Santa Catarina','SC');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('43','Rio Grande do Sul','RS');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('50','Mato Grosso do Sul','MS');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('51','Mato Grosso','MT');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('52','Goiás','GO');
+insert into tbuf (codigoibge, nmestado, uf)
+values ('53','Distrito Federal','DF');

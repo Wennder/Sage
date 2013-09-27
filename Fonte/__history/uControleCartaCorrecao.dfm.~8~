@@ -1,0 +1,75 @@
+inherited frmControleCartaCorrecao: TfrmControleCartaCorrecao
+  Caption = 'Carta de Corre'#231#227'o'
+  ClientHeight = 142
+  ClientWidth = 442
+  ExplicitWidth = 448
+  ExplicitHeight = 171
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited JvNavPaneToolPanel1: TJvNavPaneToolPanel
+    Width = 442
+    Height = 142
+    ExplicitHeight = 192
+    inherited pn: TPanel
+      Top = 107
+      Width = 438
+      ExplicitTop = 157
+      ExplicitWidth = 613
+      inherited btnGrava: TcxButton
+        Left = 238
+        OnClick = btnGravaClick
+        ExplicitLeft = 224
+      end
+      inherited btnCancela: TcxButton
+        Left = 36
+        Visible = False
+        ExplicitLeft = 312
+      end
+      inherited brnDeleta: TcxButton
+        Left = 137
+        Visible = False
+        ExplicitLeft = 157
+        ExplicitTop = -12
+      end
+      inherited BtnSair: TcxButton
+        Left = 339
+        ExplicitLeft = 514
+      end
+      inherited btnExportar: TcxButton
+        Left = -65
+        ExplicitLeft = 211
+      end
+      inherited btnImprimir: TcxButton
+        Left = -166
+        ExplicitLeft = 110
+      end
+    end
+    object cxLabelMsg: TcxLabel
+      Left = 3
+      Top = 56
+      AutoSize = False
+      Caption = 'Clique em confirma para enviar a carta de corre'#231#227'o'
+      Properties.Alignment.Horz = taCenter
+      Transparent = True
+      Height = 17
+      Width = 436
+      AnchorX = 221
+    end
+    object Memo: TMemo
+      Left = 376
+      Top = 60
+      Width = 63
+      Height = 45
+      TabOrder = 2
+      Visible = False
+    end
+  end
+  inherited SaveDlg: TSaveDialog
+    Left = 480
+    Top = 312
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 24
+    Top = 112
+  end
+end

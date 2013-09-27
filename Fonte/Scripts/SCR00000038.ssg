@@ -1,0 +1,4 @@
+ALTER TABLE TBPEDIDO
+ADD inotafiscal int4 null;
+
+comment on column tbpedido.inotafiscal is 'NUMERO DA NOTA FISCAL'

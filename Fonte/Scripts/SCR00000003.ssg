@@ -1,0 +1,16 @@
+--Autor: André Luis
+--Data de criação: 04/07/2006 - 00:19
+--Objeitvo: Criar a tabela TbAnaliseCredito
+
+-- DROP TABLE TbAnaliseCredito CASCADE;
+CREATE TABLE TbAnaliseCredito(
+	iCodigo 	INTEGER 	PRIMARY KEY REFERENCES TbCliente(iCodigo),
+	nLimiteCredito  NUMERIC(12,2)	NOT NULL DEFAULT 0,
+	dVencimento	DATE 		NOT NULL DEFAULT CURRENT_DATE,
+	sStatus		CHAR(1)		NOT NULL DEFAULT 'A'
+);
+Comment on Table TbAnaliseCredito is 'Tabela com informaçães sobre créditos de clientes';
+Comment on Column TbAnaliseCredito.iCodigo is 'Código do cliente';
+Comment on Column TbAnaliseCredito.nLimiteCredito is 'Limite de crédito do cliente em valor';
+Comment on Column TbAnaliseCredito.dVencimento is 'Data de vencimento do limite';
+Comment on Column TbanaliseCredito.sStatus is 'A = Ativo - I = Inativo';

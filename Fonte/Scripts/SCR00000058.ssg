@@ -1,0 +1,136 @@
+﻿CREATE OR REPLACE FUNCTION script_58() RETURNS void AS
+$$
+BEGIN
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'codigo'
+			)
+	THEN
+		ALTER TABLE tbentrada RENAME codigo TO icodigo;
+	END IF;
+	            
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'datadigitacao'
+			)
+	THEN
+		ALTER TABLE tbentrada RENAME datadigitacao TO ddataoperacao;
+	END IF;
+
+	IF (
+			SELECT 1
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'codigo'
+			) = 1
+	THEN		
+		ALTER TABLE tbentrada RENAME codigo TO icodigo;
+	END IF;
+	
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentradaitens'
+			  AND  column_name = 'codigo'
+			)
+	THEN		
+		ALTER TABLE tbentradaitens RENAME codigo TO icodigo;
+	END IF;
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentradaitens'
+			  AND  column_name = 'produto'
+			)
+	THEN	
+		ALTER TABLE tbentradaitens RENAME produto TO iproduto;
+	END IF;	
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentradaitens'
+			  AND  column_name = 'quantidade'
+			)
+	THEN	
+		ALTER TABLE tbentradaitens RENAME quantidade TO nquantidade;
+	END IF;			
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_pkey'
+			)
+	THEN
+		/*ALTER TABLE tbentradaitens DROP CONSTRAINT tbentradaitens_pkey;*/
+
+		ALTER TABLE tbentradaitens
+			ADD CONSTRAINT tbentradaitens_pkey PRIMARY KEY(icodigo, iproduto);
+	END IF;			
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentrada'
+			)
+	THEN
+		ALTER TABLE tbentradaitens DROP CONSTRAINT tbentrada;
+	END IF;			
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_entrada'
+			)
+	THEN
+		ALTER TABLE tbentradaitens DROP CONSTRAINT tbentradaitens_entrada;
+	END IF;	
+	
+	ALTER TABLE tbentradaitens
+	ADD CONSTRAINT tbentradaitens_entrada FOREIGN KEY (icodigo)
+		  REFERENCES tbentrada (icodigo) MATCH SIMPLE
+		  ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbentradaitens'
+			  AND  constraint_name = 'tbentradaitens_produto'
+			)
+	THEN
+		ALTER TABLE tbentradaitens DROP CONSTRAINT tbentradaitens_produto;
+	END IF;			
+			  
+	ALTER TABLE tbentradaitens
+	ADD CONSTRAINT tbentradaitens_produto FOREIGN KEY (iproduto)
+		  REFERENCES tbproduto (icodigo) MATCH SIMPLE
+		  ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbentrada'
+			  AND  column_name = 'sstatus'
+			)
+	THEN
+		ALTER TABLE tbentrada ADD COLUMN sstatus CHAR(1) DEFAULT 'A' NOT NULL;
+	END IF;		
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_58();
+DROP FUNCTION script_58();
+
+DROP SEQUENCE IF EXISTS tbentrada_icodigo_seq CASCADE;
+CREATE SEQUENCE tbentrada_icodigo_seq;
+SELECT setval('tbentrada_icodigo_seq', (SELECT COALESCE(MAX(icodigo),1) FROM tbentrada));
+ALTER TABLE tbentrada ALTER COLUMN icodigo SET DEFAULT nextval('tbentrada_icodigo_seq');

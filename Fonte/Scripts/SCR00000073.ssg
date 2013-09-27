@@ -1,0 +1,120 @@
+/************************************************************
+ * Autor........: Andre Praeiro
+ * Modulo.......: Todos
+ * Data/Hora....: 04/07/2013 12:44
+ * Obj. Ult Alt.: funcao gera_historico_movimentacao e retorna_estoque_atual_produto
+ ************************************************************/
+
+
+
+CREATE OR REPLACE FUNCTION gera_historico_movimentacao(piproduto integer, pdata_inicio date, pdata_fim date)
+  RETURNS void AS
+$BODY$
+begin
+	if exists(select null from information_schema.tables where table_name = 'tb_temp_historico_movimentacao') 
+	then
+		drop table tb_temp_historico_movimentacao;
+	end if;
+	
+	create temporary table tb_temp_historico_movimentacao(
+		iproduto int,
+		data_mov date,
+		hora_mov time,
+		detalhes varchar(300),
+		qtd_mov numeric
+	);
+
+	--insere movimentação de venda
+	if exists(select null from vw_saidas_produto where iproduto = piproduto and ddatapedido between pdata_inicio and pdata_fim) 
+	then	
+		insert into tb_temp_historico_movimentacao(iproduto, data_mov, hora_mov, detalhes, qtd_mov)
+		select iproduto, ddatapedido, thorapedido, cast('codigo: ' || cast(ipedido as varchar(30)) || ' nota fiscal: ' || cast(inotafiscal as varchar(30)) as text)
+		,nquantidade  
+		from vw_saidas_produto where iproduto = piproduto and ddatapedido between pdata_inicio and pdata_fim;
+	end if;
+	
+	--insere movimentação de entrada
+	if exists(select null from vw_entradas_produto where iproduto = piproduto and ddataentrada between pdata_inicio and pdata_fim)
+	then
+		insert into tb_temp_historico_movimentacao(iproduto, data_mov, hora_mov, detalhes, qtd_mov)
+		select iproduto, ddataentrada, thoraentrada
+		,cast('NF: ' || cast(numero as varchar(30)) || ' Serie: ' || cast(serie as varchar(30)) || ' Forn: ' || cast(fornecedor as varchar(30)) as text)
+		,nquantidade  
+		from vw_entradas_produto 
+		where iproduto = piproduto and ddataentrada between pdata_inicio and pdata_fim;
+	end if;
+		
+	--insere movimentação de inventario
+	if exists(select null from vwinventarioitens where iproduto = piproduto and ddataoperacao between pdata_inicio and pdata_fim and sstatus = 'F')
+	then
+		insert into tb_temp_historico_movimentacao(iproduto, data_mov, hora_mov, detalhes, qtd_mov)
+		select iproduto, ddataoperacao, "time"(ddataoperacao),  
+		cast('inventario: ' || cast(iinventario as varchar(30)) as text)
+		,ndiferenca
+		from vwinventarioitens
+		where iproduto = piproduto and ddataoperacao between pdata_inicio and pdata_fim and sstatus = 'F';
+	end if;
+
+	--insere movimentaçao de devolução
+	if exists(select null from vwdevolucaovendaitens where iproduto = piproduto and ddataoperacao between pdata_inicio and pdata_fim and sstatus = 'A')
+	then
+		insert into tb_temp_historico_movimentacao(iproduto, data_mov, hora_mov, detalhes, qtd_mov)
+		select iproduto, ddataoperacao, "time"(ddataoperacao),  
+		cast('devolução de venda: ' || cast(idevvenda as varchar(30)) as text)
+		,qtdadevolver
+		from vwdevolucaovendaitens
+		where iproduto = piproduto and ddataoperacao between pdata_inicio and pdata_fim and sstatus = 'A';
+	end if;
+	
+	--Exemplo de chamada do comando
+	-- Parametros: codigo do produto, periodo inicial, periodo final
+	-- Retorno: codigo do produto, data da movimentação, hora da movimentação, detalhes da movimentação, quantidade movimentada
+	--select gera_historico_movimentacao(12,'2000-01-01', '2014-01-01'); 
+	--select * from tb_temp_historico_movimentacao order by data_mov, hora_mov (Sempre utilizar esse order by)
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION gera_historico_movimentacao(integer, date, date)
+  OWNER TO postgres;
+
+
+CREATE OR REPLACE FUNCTION retorna_estoque_atual_produto(piproduto integer)
+  RETURNS numeric AS
+$BODY$
+declare
+	total_saidas numeric := 0;
+	total_entradas numeric := 0;
+	total_inventarios numeric := 0;
+	total_devoluvao_venda numeric = 0;
+begin
+	--calcular total de saida de vendas
+	select coalesce((select sum(nquantidade) 	
+	from vw_saidas_produto
+	where iproduto = piproduto),(select 0)) into total_saidas;
+
+	
+	--calcular total de entrada
+	select coalesce((select sum(nquantidade)
+	from vw_entradas_produto
+	where iproduto = piproduto),(select 0)) into total_entradas;
+	
+	--calcular o total de inventarios
+	select coalesce((select sum(ndiferenca)
+	from vwinventarioitens
+	where iproduto = piproduto and sstatus = 'F'),(select 0)) into total_inventarios;
+
+	--calcular o total de devolucoes de venda
+	select coalesce((select sum(qtdadevolver)
+	from vwdevolucaovendaitens
+	where iproduto = piproduto and sstatus = 'A'),(select 0)) into total_inventarios;
+	
+	--Calcula estoque atual total
+	return (total_saidas + total_entradas + total_inventarios + total_devolucao_venda);
+		
+end;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION retorna_estoque_atual_produto(integer)
+  OWNER TO postgres;

@@ -1,0 +1,100 @@
+SELECT emp.iempresa
+      ,emp.srazaosocial
+      ,emp.sfantasia
+      ,emp.scnpj AS "scnpjempresa"
+      ,emp.sendereco AS "senderecoempresa"
+      ,emp.sbairro AS "sbairroempresa"
+      ,emp.icidade AS "icidadeempresa"
+      ,cemp.snome AS "scidadeemp"
+      ,cemp.suf AS "sufemp"
+      ,emp.scep AS "scepempresa"
+      ,emp.sfone AS "sfoneempresa"
+      ,emp.semail AS "semailempresa"
+      ,emp.ativo AS "statusempresa"
+      ,tbnatureza.sdescricao AS Natureza_Operacao
+      ,tbpedido.icfop AS CFOP
+      ,COALESCE(tbconsumidor.snome, tbpessoa.snome) AS nome
+      ,COALESCE(tbconsumidor.sendereco, tbpessoa.sendereco) AS sendereco
+      ,COALESCE(tbconsumidor.sbairro, tbpessoa.sbairro) AS sbairro
+      ,COALESCE(tbconsumidor.scep, tbpessoa.scep) AS scep
+      ,COALESCE(tbpessoafisica.scpf, tbpessoajuridica.scnpj) AS cpf_cnpj
+      ,COALESCE(tbcidadeconsumidor.snome, tbcidade.snome) AS cidade
+      ,COALESCE(tbcidadeconsumidor.suf, tbcidade.suf) AS suf
+      ,COALESCE(tbconsumidor.sfone, tbpessoa.sfone) AS sfone
+      ,tbpessoajuridica.sinscestadual
+      ,tbproduto.sdescricao || ' - ' || tbproduto.sreferencia AS sdescricao
+      ,tbmarca.sdescricao AS marca
+      ,tbproduto.icodigo
+      ,tbunidade.sdescricao AS unidade
+      ,tbpedido.ddatapedido
+      ,tbcodigofiscal.nicmspf
+      ,tbcodigofiscal.nicmspj
+      ,tbpedido.sobservacao
+      ,tbpedidoitens.nquantidade
+      ,(tbpedidoitens.nvalor)
+      ,tbpedidoitens.nquantidade * tbpedidoitens.nvalor AS "totalitem"
+      ,tbpedido.najustepercentual
+      ,CASE 
+            WHEN tbpedido.najustepercentual > 0 THEN (
+                     (tbpedidoitens.nquantidade * tbpedidoitens.nvalor) * ((tbpedido.najustepercentual) / 100)
+                 )
+            ELSE 0.00
+       END AS "totalacresc"
+      ,CASE 
+            WHEN tbpedido.najustepercentual < 0 THEN (
+                     (tbpedidoitens.nquantidade * tbpedidoitens.nvalor) * ((tbpedido.najustepercentual) / 100)
+                 )
+            ELSE 0.00
+       END AS "totaldesc"
+      ,CAST(
+           (
+               tbpedidoitens.nvalor + (
+                   CASE 
+                        WHEN tbpedido.najustepercentual < 0 THEN (
+                                 (tbpedidoitens.nquantidade * tbpedidoitens.nvalor) * ((tbpedido.najustepercentual) / 100) 
+                                 /
+                                 tbpedidoitens.nquantidade
+                             )
+                        ELSE 0.00
+                   END
+               )
+           ) + (
+               CASE 
+                    WHEN tbpedido.najustepercentual > 0 THEN (
+                             (tbpedidoitens.nquantidade * tbpedidoitens.nvalor) * ((tbpedido.najustepercentual) / 100) /
+                             tbpedidoitens.nquantidade
+                         )
+                    ELSE 0.00
+               END
+           ) AS NUMERIC(12, 2)
+       ) AS "nvalorcomajuste"
+      ,CAST(
+           (
+               (tbpedidoitens.nquantidade * tbpedidoitens.nvalor) + (
+                   (tbpedidoitens.nquantidade * tbpedidoitens.nvalor) * ((tbpedido.najustepercentual) / 100)
+               )
+           ) AS NUMERIC(12, 2)
+       ) AS "totalitemcomajuste"
+      ,tbpedido.sveiculo
+      ,tbpedido.splaca
+      ,tbpedido.nkm
+      ,tbpedido.icodigo AS "Pedido"
+FROM   tbpedido
+JOIN tbempresa emp ON emp.iEmpresa = tbpedido.iempresa
+JOIN tbcidade cemp ON cemp.icodigo = emp.icidade
+JOIN tbpedidoitens ON tbpedidoitens.ipedido = tbpedido.icodigo
+LEFT OUTER JOIN tbcliente ON tbcliente.icodigo = tbpedido.icliente
+LEFT OUTER JOIN tbpessoa ON tbpessoa.icodigo = tbcliente.icodigo
+JOIN tbproduto ON tbproduto.icodigo = tbpedidoitens.iproduto
+JOIN tbnatureza ON tbnatureza.icodigo = tbpedido.inatureza
+LEFT OUTER JOIN tbpessoafisica ON tbpessoafisica.icodigo = tbpessoa.icodigo
+LEFT OUTER JOIN tbpessoajuridica ON tbpessoajuridica.icodigo = tbpessoa.icodigo
+LEFT OUTER JOIN tbcidade ON tbcidade.icodigo = tbpessoa.icidade
+JOIN tbunidade ON tbunidade.icodigo = tbproduto.iundsaida
+JOIN tbcodigofiscal ON tbcodigofiscal.icodigo = tbpedido.icfop
+JOIN tbmarca ON tbmarca.icodigo = tbproduto.imarca
+LEFT OUTER JOIN tbconsumidor ON tbconsumidor.ipedido = tbpedido.icodigo
+LEFT OUTER JOIN tbcidade AS tbcidadeconsumidor ON tbcidadeconsumidor.icodigo = tbconsumidor.icidade
+WHERE  tbpedido.icodigo = :pedido
+
+ORDER BY tbproduto.sservico

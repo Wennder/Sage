@@ -1,0 +1,8 @@
+alter table tbpedido
+add sveiculo varchar(30) null;
+
+alter table tbpedido
+add splaca varchar(15) null;
+
+alter table tbpedido
+add nKm numeric(12,2) null;

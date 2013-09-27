@@ -1,0 +1,2 @@
+alter table tbpedido
+add bCupomFiscal boolean;

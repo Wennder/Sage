@@ -1,0 +1,166 @@
+﻿CREATE OR REPLACE FUNCTION script_53() RETURNS void AS
+$$
+BEGIN
+	UPDATE tbpesquisa
+	SET    scomando = 
+	       'SELECT 
+				TBPRODUTO.ICODIGO AS CODIGO, 
+				TBPRODUTO.SDESCRICAO AS DESCRICAO, 
+				TBMARCA.SDESCRICAO AS MARCA, 
+				TBPRODUTO.SREFERENCIA AS REFERENCIA,
+				S.SDESCRICAO AS SUBGRUPO,
+				G.SDESCRICAO AS GRUPO
+				FROM TBPRODUTO 
+				JOIN TBMARCA ON TBMARCA.ICODIGO = TBPRODUTO.IMARCA
+				JOIN TBSUBGRUPO S ON S.icodigo = tbproduto.isubgrupo and s.igrupo = tbproduto.igrupo
+				JOIN TBGRUPO G on G.iCodigo = S.iGrupo
+				'
+	WHERE  iCodigo = 8;
+
+	UPDATE tbpesquisa
+	SET    scomando = 'SELECT iCodigo as "Codigo", sDescricao as "Descricao" from tbcor'
+	WHERE  iCodigo = 20;
+
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbempresa'
+			)
+	THEN
+		CREATE TABLE tbempresa(
+		       iempresa Serial,
+		       srazaosocial VARCHAR(60) NOT NULL,
+		       sfantasia VARCHAR(60) NOT NULL,
+		       scnpj VARCHAR(14) NOT NULL,
+		       sendereco VARCHAR(60) NOT NULL,
+		       snumero VARCHAR(60) NOT NULL,              
+		       scomplemento VARCHAR(60) NOT NULL,       
+		       sbairro VARCHAR(60) NOT NULL,
+		       icidade INTEGER NOT NULL,
+		       scep VARCHAR(8) NOT NULL,
+		       sfone VARCHAR(20) NOT NULL,
+		       semail VARCHAR(70) NOT NULL,
+		       sInscEstadual VARCHAR(14) NULL,
+		       sInscMunicipal VARCHAR(15) NULL,
+		       sInscSubstituto VARCHAR(14) NULL,       
+		       sCNAE VARCHAR(7) NULL,              
+		       sCRT VARCHAR(1) NULL,                     
+		       ativo BOOLEAN DEFAULT TRUE NOT NULL,
+		       PRIMARY KEY(iempresa)
+		   );
+	END IF;
+	
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbpedido'
+			  AND  column_name = 'iempresa'
+			)
+	THEN
+		ALTER TABLE tbpedido ADD COLUMN iempresa INT NOT NULL DEFAULT 1;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbpedido'
+			  AND  constraint_name = 'fktbpedido_empresa'
+			)
+	THEN
+		ALTER TABLE tbpedido
+		  ADD CONSTRAINT fktbpedido_empresa FOREIGN KEY(iempresa)
+		      REFERENCES tbempresa(iempresa) MATCH SIMPLE
+		      ON 
+		UPDATE NO ACTION ON 
+		DELETE NO ACTION;
+	END IF;
+	
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbparametro'
+			)
+	THEN
+		CREATE TABLE tbparametro(
+		       iParametro Serial,
+		       sDescricao VARCHAR(1000) NOT NULL,
+		       sParametro VARCHAR(500) NOT NULL,
+		       sValor TEXT NOT NULL,
+		       iEmpresa INTEGER NOT NULL,
+		       PRIMARY KEY(iParametro)
+		   )
+		    ;
+	END IF;
+	
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbparametro'
+			  AND  constraint_name = 'fktbparametro_empresa'
+			)
+	THEN
+		ALTER TABLE tbparametro
+		  ADD CONSTRAINT fktbparametro_empresa FOREIGN KEY(iempresa)
+		      REFERENCES tbempresa(iempresa) MATCH SIMPLE
+		      ON 
+		UPDATE NO ACTION ON 
+		DELETE NO ACTION;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbparametro
+			WHERE  sparametro = 'CodNaturezaVenda'
+			)
+	THEN	
+		INSERT INTO tbparametro 
+				(sDescricao ,sparametro ,svalor ,iempresa)
+		VALUES 
+				('Código padrão da Natureza de Op. para Venda' ,'CodNaturezaVenda' ,'1' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbparametro
+			WHERE  sparametro = 'CodCFOPVenda'
+			)
+	THEN	
+		INSERT INTO tbparametro 
+				(sDescricao ,sparametro ,svalor ,iempresa)
+		VALUES 
+				('Código padrão do CFOP para Venda' ,'CodCFOPVenda' ,'5102' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbparametro
+			WHERE  sparametro = 'NmArqOrcamento'
+			)
+	THEN		
+		INSERT INTO tbparametro 
+				(sDescricao ,sparametro ,svalor ,iempresa)
+		VALUES 
+				('Nome do Arquivo Rtm para Orçamento' ,'NmArqOrcamento' ,'Orcamento_Pedido_v1.rtm' ,'1');
+	END IF;
+	
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbformarecebimento'
+			)
+	THEN
+		CREATE TABLE tbformarecebimento
+		(
+		  pedido int4 NOT NULL,
+		  forma int4,
+		  bandeira int4,
+		  CONSTRAINT tbformarecebimento_pkey PRIMARY KEY (pedido)
+		) 
+		WITHOUT OIDS;
+		ALTER TABLE tbformarecebimento OWNER TO postgres;	
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_53();
+DROP FUNCTION script_53();

@@ -1,0 +1,5 @@
+update tbmenuacesso set ativo = false
+where idmenuacesso = 9;
+
+update tbmenuacessotipo set nmmenuacessotipo = 'Relatórios'
+where idmenuacessotipo = 3;

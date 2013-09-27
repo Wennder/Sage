@@ -1,0 +1,15 @@
+CREATE TABLE tbentradaitens
+(
+  codigo int4 NOT NULL, -- CODIGO DA ENTRADA DE NF
+  produto int4 NOT NULL, -- CODIGO DO PRODUTO
+  quantidade numeric(12,2), -- QUANTIDADE
+  valor numeric(12,2), -- VALOR UNITARIO
+  CONSTRAINT tbentradaitens_pkey PRIMARY KEY (codigo, produto)
+) 
+WITHOUT OIDS;
+ALTER TABLE tbentradaitens OWNER TO postgres;
+COMMENT ON COLUMN tbentradaitens.codigo IS 'CODIGO DA ENTRADA DE NF';
+COMMENT ON COLUMN tbentradaitens.produto IS 'CODIGO DO PRODUTO';
+COMMENT ON COLUMN tbentradaitens.quantidade IS 'QUANTIDADE';
+COMMENT ON COLUMN tbentradaitens.valor IS 'VALOR UNITARIO';
+

@@ -1,0 +1,321 @@
+﻿CREATE OR REPLACE FUNCTION script_52() RETURNS void AS
+$$
+BEGIN
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbmodulo'
+			)
+	THEN
+		CREATE TABLE tbmodulo(
+		       idmodulo Serial,
+		       nmmodulo VARCHAR(100) NOT NULL,
+		       ativo BOOLEAN DEFAULT TRUE NOT NULL,
+		       PRIMARY KEY(idmodulo)
+		   )
+		    ;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbmenuacessotipo'
+			)
+	THEN	
+		CREATE TABLE tbmenuacessotipo(
+		       idmenuacessotipo Serial,
+		       nmmenuacessotipo VARCHAR(50) NOT NULL,
+		       PRIMARY KEY(idmenuacessotipo)
+		   )
+		    ;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbmenuacesso'
+			)
+	THEN		
+		CREATE TABLE tbmenuacesso(
+		       idmenuacesso Serial,
+		       nmmenuacesso VARCHAR(100) NOT NULL,
+		       idmodulo INT NOT NULL REFERENCES Tbmodulo(idmodulo),
+		       form VARCHAR(50) NOT NULL,
+		       idmenuacessotipo INT NOT NULL REFERENCES TbMenuAcessoTipo(idmenuacessotipo),
+		       ativo BOOLEAN DEFAULT TRUE NOT NULL,
+		       PRIMARY KEY(idmenuacesso)
+		   )
+		    ;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Gerenciador'
+			)
+	THEN				
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Gerenciador' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Banco'
+			)
+	THEN					
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Banco' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Caixa Financeiro'
+			)
+	THEN						
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Caixa Financeiro' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Contas a Pagar'
+			)
+	THEN	
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Contas a Pagar' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Contas a Receber'
+			)
+	THEN		
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Contas a Receber' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Estoque'
+			)
+	THEN			
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Estoque' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Vendas'
+			)
+	THEN				
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Vendas' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Controle de Produção'
+			)
+	THEN			
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Controle de Produção' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmodulo 
+			WHERE  nmmodulo = 'Contabilidade'
+			)
+	THEN	
+		INSERT INTO tbmodulo 
+				(nmmodulo ,ativo)
+		VALUES 
+				('Contabilidade' ,'1');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmenuacessotipo 
+			WHERE  nmmenuacessotipo = 'Cadastros'
+			)
+	THEN		
+		INSERT INTO tbmenuacessotipo 
+				(nmmenuacessotipo)
+		VALUES 
+				('Cadastros');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmenuacessotipo 
+			WHERE  nmmenuacessotipo = 'Consultas'
+			)
+	THEN			
+		INSERT INTO tbmenuacessotipo 
+				(nmmenuacessotipo)
+		VALUES 
+				('Consultas');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmenuacessotipo 
+			WHERE  nmmenuacessotipo = 'Relatórios'
+			)
+	THEN			
+		INSERT INTO tbmenuacessotipo 
+				(nmmenuacessotipo)
+		VALUES 
+				('Relatórios');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbmenuacessotipo 
+			WHERE  nmmenuacessotipo = 'Rotinas Operacionais'
+			)
+	THEN		
+		INSERT INTO tbmenuacessotipo 
+				(nmmenuacessotipo)
+		VALUES 
+				('Rotinas Operacionais');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT *
+			FROM   tbgrupousuario 
+			WHERE  icodigo = 0
+			)
+	THEN
+		INSERT INTO tbgrupousuario
+		VALUES 
+				(0 ,'Administradores do Sistema' ,'A');
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbusuario 
+			WHERE  upper(slogin) = upper('Administrador')
+			)
+	THEN
+		INSERT INTO tbusuario
+		VALUES 
+				(0 ,'Administrador do Sistema' ,'Administrador' ,'ªœ¤ªœ¥Ÿ˜wighj' ,'A' ,0);
+	END IF;
+	
+	UPDATE tbpesquisa
+	SET    sparametrocomplementar = 'WHERE SSTATUS = ''A'' and iCodigo > 0'
+	WHERE  sdescricao = 'Pesquisa de Usuários';
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbusuario'
+			  AND  column_name = 'ssenha'
+			)
+	THEN
+		ALTER TABLE tbusuario ALTER ssenha TYPE TEXT;
+	END IF;
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbcontroleacesso'
+			  AND  column_name = 'irotina'
+			)
+	THEN	
+		ALTER TABLE tbcontroleacesso RENAME irotina TO idmenuacesso;
+	END IF;
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.tables
+			WHERE  table_name = 'tbrotinas'
+			)
+	THEN
+		DROP TABLE tbrotinas CASCADE;
+	END IF;
+
+	
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbcontroleacesso'
+			  AND  constraint_name = 'fktbcontroleacessotbrotina'
+			)
+	THEN	
+		ALTER TABLE tbcontroleacesso
+		  DROP CONSTRAINT fktbcontroleacessotbrotina;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   information_schema.table_constraints
+			WHERE  table_name = 'tbcontroleacesso'
+			  AND  constraint_name = 'fktbcontroleacessotbmenuacesso'
+			)
+	THEN	
+		ALTER TABLE tbcontroleacesso
+		  ADD CONSTRAINT fktbcontroleacessotbmenuacesso FOREIGN KEY(idmenuacesso)
+		      REFERENCES tbmenuacesso(idmenuacesso) MATCH SIMPLE
+		      ON 
+		UPDATE NO ACTION ON 
+		DELETE NO ACTION;
+	END IF;
+
+	IF NOT EXISTS(
+			SELECT NULL
+			FROM   tbpesquisa
+			WHERE  sDescricao = 'Pesquisa de Cor'
+			)
+	THEN			
+		INSERT INTO tbpesquisa
+		VALUES 
+				((
+				    SELECT MAX(iCodigo) + 1
+				    FROM   tbpesquisa
+				) ,0 ,'Pesquisa de Cor' ,'select iCodigo as "Codigo", sDescricao from tbcor' ,'sDescricao' ,
+				'Where sstatus = ''A''' ,'Codigo');
+	END IF;
+	
+	UPDATE tbpesquisa
+	SET    scomando = 'SELECT ICODIGO AS CODIGO, SNOME AS NOME FROM TBGRUPOUSUARIO',
+	       sparametrocomplementar = 'WHERE SSTATUS = ''A'' and icodigo > 0'
+	WHERE  sdescricao = 'Pesquisa de Grupo de Usuários';
+
+	IF EXISTS(
+			SELECT NULL
+			FROM   information_schema.columns
+			WHERE  table_name = 'tbproduto'
+			  AND  column_name = 'ncusto'
+			)
+	THEN
+		ALTER TABLE tbproduto ALTER ncusto TYPE MONEY;
+	END IF;
+END;
+$$ LANGUAGE plpgsql;
+SELECT script_52();
+DROP FUNCTION script_52();

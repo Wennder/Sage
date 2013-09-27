@@ -1,0 +1,74 @@
+CREATE OR REPLACE VIEW vw_entradas_produto AS 
+ SELECT date(tbentrada.ddataoperacao) AS ddataentrada, 
+    "time"(tbentrada.ddataoperacao) AS thoraentrada, tbentradaitens.iproduto, 
+    tbentradaitens.nquantidade, tbentrada.serie, tbentrada.numero, 
+    tbentrada.fornecedor
+   FROM tbentrada
+   JOIN tbentradaitens ON tbentradaitens.icodigo = tbentrada.icodigo
+  WHERE tbentrada.sstatus = 'A'::bpchar
+  ORDER BY tbentrada.ddataoperacao;
+  
+create or replace function retorna_estoque_atual_produto(piproduto int) returns numeric as
+$$
+declare
+	total_saidas numeric := 0;
+	total_entradas numeric := 0;
+	total_inventarios numeric := 0;
+begin
+	--calcular total de saida de vendas
+	select coalesce((select sum(nquantidade) 	
+	from vw_saidas_produto
+	where iproduto = piproduto),(select 0)) into total_saidas;
+
+	
+	--calcular total de entrada
+	select coalesce((select sum(nquantidade)
+	from vw_entradas_produto
+	where iproduto = piproduto),(select 0)) into total_entradas;
+	
+	--calcular o total de inventarios
+	
+	--Calcula estoque atual total
+	return (total_saidas + total_entradas + total_inventarios);
+		
+end;
+$$ language plpgsql;
+
+
+create or replace function gera_historico_movimentacao(piproduto int, pdata_inicio date, pdata_fim date) returns void as
+$$
+begin
+	if exists(select null from information_schema.tables where table_name = 'tb_temp_historico_movimentacao') 
+	then
+		drop table tb_temp_historico_movimentacao;
+	end if;
+	
+	create temporary table tb_temp_historico_movimentacao(
+		iproduto int,
+		data_mov date,
+		hora_mov time,
+		detalhes varchar(300),
+		qtd_mov numeric
+	);
+
+	--insere movimentação de venda
+	insert into tb_temp_historico_movimentacao(iproduto, data_mov, hora_mov, detalhes, qtd_mov)
+	select iproduto, ddatapedido, thorapedido, cast('codigo: ' || cast(ipedido as varchar(30)) || ' nota fiscal: ' || cast(inotafiscal as varchar(30)) as text)
+	,nquantidade  
+	from vw_saidas_produto where iproduto = piproduto and ddatapedido between pdata_inicio and pdata_fim;
+	
+	--insere movimentação de entrada
+	select iproduto, ddataentrada, thoraentrada
+	,cast('NF: ' || cast(numero as varchar(30)) || ' Serie: ' || cast(serie as varchar(30)) || ' Forn: ' || cast(fornecedor as varchar(30)) as text)
+	,nquantidade  
+	from vw_entradas_produto 
+	where iproduto = piproduto and ddataentrada between pdata_inicio and pdata_fim;
+
+	
+	--insere movimentação de inventario
+	
+	--Exemplo de chamada do comando
+	--select gera_historico_movimentacao(12,'2000-01-01', '2014-01-01');
+	--select * from tb_temp_historico_movimentacao order by data_mov, hora_mov
+end;
+$$ language plpgsql;

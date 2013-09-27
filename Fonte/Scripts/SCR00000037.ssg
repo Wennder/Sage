@@ -1,0 +1,3 @@
+ALTER TABLE TBCIDADE
+ADD scodibge char(10);
+comment on column tbcidade.scodibge is 'CODIGO IBGE DO MUNICIPIO';
