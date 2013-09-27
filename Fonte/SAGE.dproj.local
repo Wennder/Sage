@@ -2,10 +2,12 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2013/07/04 17:22:52.000.462,=D:\Projetos de Software\SAGE\Fonte\Unit1.pas</Transaction>
-    <Transaction>2013/07/05 14:58:21.000.737,D:\Projetos de Software\SAGE\Fonte\Unit1.dfm=D:\Projetos de Software\SAGE\Fonte\uCadastroRecebimentos.dfm</Transaction>
-    <Transaction>2013/07/05 14:58:21.000.737,D:\Projetos de Software\SAGE\Fonte\Unit1.pas=D:\Projetos de Software\SAGE\Fonte\uCadastroRecebimentos.pas</Transaction>
+    <Transaction>2013/07/05 14:58:21.000.737,D:\Projetos de Software\SAGE\Fonte\uCadastroRecebimentos.dfm=D:\Projetos de Software\SAGE\Fonte\Unit1.dfm</Transaction>
+    <Transaction>2013/07/05 14:58:21.000.737,D:\Projetos de Software\SAGE\Fonte\uCadastroRecebimentos.pas=D:\Projetos de Software\SAGE\Fonte\Unit1.pas</Transaction>
     <Transaction>2013/07/14 10:34:22.000.622,=D:\Projetos de Software\SAGE\Fonte\Unit1.pas</Transaction>
-    <Transaction>2013/07/14 10:34:47.000.971,D:\Projetos de Software\SAGE\Fonte\uControleCartaCorrecao.pas=D:\Projetos de Software\SAGE\Fonte\Unit1.pas</Transaction>
-    <Transaction>2013/07/14 10:34:47.000.972,D:\Projetos de Software\SAGE\Fonte\uControleCartaCorrecao.dfm=D:\Projetos de Software\SAGE\Fonte\Unit1.dfm</Transaction>
+    <Transaction>2013/07/14 10:34:47.000.971,D:\Projetos de Software\SAGE\Fonte\Unit1.pas=D:\Projetos de Software\SAGE\Fonte\uControleCartaCorrecao.pas</Transaction>
+    <Transaction>2013/07/14 10:34:47.000.972,D:\Projetos de Software\SAGE\Fonte\Unit1.dfm=D:\Projetos de Software\SAGE\Fonte\uControleCartaCorrecao.dfm</Transaction>
+    <Transaction>2013/09/27 16:55:29.390,=D:\Projetos de Software\GitHub\Sage\Fonte\UsoGeral\UsoGeral.pas</Transaction>
+    <Transaction>2013/09/27 16:55:29.499,=D:\Projetos de Software\GitHub\Sage\Fonte\UsoGeral\uTraducaoDevExpress.pas</Transaction>
   </Transactions>
 </BorlandProject>

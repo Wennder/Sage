@@ -71,12 +71,10 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\..\UsoGeral\uTraducaoDevExpress.pas"/>
         <DCCReference Include="uFrmTituloForm.pas">
             <Form>fFrmTituloForm</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\..\UsoGeral\UsoGeral.pas"/>
         <DCCReference Include="Classes\uAnaliseCredito.pas"/>
         <DCCReference Include="Classes\uCidade.pas"/>
         <DCCReference Include="Classes\uCliente.pas"/>
@@ -304,14 +302,9 @@
         </DCCReference>
         <DCCReference Include="Classes\uDevVenda.pas"/>
         <DCCReference Include="Classes\uNF.pas"/>
-        <DCCReference Include="uCadastroRecebimentos.pas">
-            <Form>frmCadastroRecebimentos</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="uControleCartaCorrecao.pas">
-            <Form>frmControleCartaCorrecao</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
+        <DCCReference Include="Classes\uEmpresa.pas"/>
+        <DCCReference Include="UsoGeral\UsoGeral.pas"/>
+        <DCCReference Include="UsoGeral\uTraducaoDevExpress.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
