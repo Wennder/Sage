@@ -2,9 +2,7 @@ program SAGE;
 
 uses
   Forms,
-  uTraducaoDevExpress in '..\..\UsoGeral\uTraducaoDevExpress.pas',
   uFrmTituloForm in 'uFrmTituloForm.pas' {fFrmTituloForm: TFrame},
-  UsoGeral in '..\..\UsoGeral\UsoGeral.pas',
   uAnaliseCredito in 'Classes\uAnaliseCredito.pas',
   uCidade in 'Classes\uCidade.pas',
   uCliente in 'Classes\uCliente.pas',
@@ -114,7 +112,9 @@ uses
   uDevolucaoVenda in 'uDevolucaoVenda.pas' {frmDevolucaoVenda},
   uDevVenda in 'Classes\uDevVenda.pas',
   uNF in 'Classes\uNF.pas',
-  uEmpresa in 'Classes\uEmpresa.pas';
+  uEmpresa in 'Classes\uEmpresa.pas',
+  UsoGeral in 'UsoGeral\UsoGeral.pas',
+  uTraducaoDevExpress in 'UsoGeral\uTraducaoDevExpress.pas';
 
 {$R *.res}
 
