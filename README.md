@@ -5,10 +5,11 @@ Repositório do Projeto SAGE
 
 Colaboradores Ativos:
 
-André Praeiro
-Jeimyson Souza
+  André Praeiro
+
+  Jeimyson Souza
 
 Colaboradores (Inativos)
 
-Ivan Seibel
+  Ivan Seibel
 
