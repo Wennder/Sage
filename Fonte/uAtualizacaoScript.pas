@@ -1,3 +1,4 @@
+{Teste COMMIT GitHub}
 unit uAtualizacaoScript;
 
 interface
